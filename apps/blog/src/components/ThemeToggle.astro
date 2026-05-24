@@ -1,0 +1,70 @@
+---
+// 主题切换按钮
+---
+
+<button
+  id="theme-toggle"
+  class="theme-toggle-btn"
+  aria-label="切换主题"
+  title="切换浅色/深色主题"
+>
+  <!-- 太阳图标（浅色模式） -->
+  <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/>
+    <line x1="12" y1="21" x2="12" y2="23"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+    <line x1="1" y1="12" x2="3" y2="12"/>
+    <line x1="21" y1="12" x2="23" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </svg>
+  <!-- 月亮图标（深色模式） -->
+  <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+  </svg>
+</button>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  const html = document.documentElement;
+
+  function updateIcon() {
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    btn.querySelector('.icon-sun')!.style.display = isDark ? 'block' : 'none';
+    btn.querySelector('.icon-moon')!.style.display = isDark ? 'none' : 'block';
+  }
+
+  // 初始状态
+  updateIcon();
+
+  // 点击切换
+  btn?.addEventListener('click', () => {
+    const current = html.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateIcon();
+  });
+</script>
+
+<style>
+  .theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .theme-toggle-btn:hover {
+    background: var(--color-primary-container);
+    color: var(--color-primary);
+  }
+</style>

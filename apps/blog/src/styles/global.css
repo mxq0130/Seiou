@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+/* ===== 基础样式 ===== */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.6;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* 滚动条样式 */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-secondary);
+  }
+
+  /* 选中文字颜色 */
+  ::selection {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+  }
+}
+
+/* ===== 主题变量：浅色模式 ===== */
+:root {
+  --color-primary: #6750A4;
+  --color-on-primary: #FFFFFF;
+  --color-primary-container: #EADDFF;
+  --color-on-primary-container: #21005D;
+
+  --color-secondary: #625B71;
+  --color-on-secondary: #FFFFFF;
+  --color-secondary-container: #E8DEF8;
+  --color-on-secondary-container: #1D192B;
+
+  --color-bg: #FFFBFE;
+  --color-surface: #FFFBFE;
+  --color-surface-variant: #E7E0EC;
+  --color-on-surface: #1C1B1F;
+  --color-on-surface-variant: #49454F;
+
+  --color-text: #1C1B1F;
+  --color-text-secondary: #49454F;
+  --color-border: #CAC4D0;
+  --color-outline: #79747E;
+
+  /* 点缀色 */
+  --color-sakura: #FFB7C5;
+  --color-sky: #7EC8E3;
+  --color-mint: #98D8C8;
+  --color-warm: #FFB74D;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.14);
+
+  /* 圆角 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* 间距 */
+  --content-max-width: 1200px;
+  --navbar-height: 64px;
+}
+
+/* ===== 主题变量：深色模式 ===== */
+[data-theme="dark"] {
+  --color-primary: #D0BCFF;
+  --color-on-primary: #381E72;
+  --color-primary-container: #4F378B;
+  --color-on-primary-container: #EADDFF;
+
+  --color-secondary: #CCC2DC;
+  --color-on-secondary: #332D41;
+  --color-secondary-container: #4A4458;
+  --color-on-secondary-container: #E8DEF8;
+
+  --color-bg: #141218;
+  --color-surface: #1C1B1F;
+  --color-surface-variant: #49454F;
+  --color-on-surface: #E6E1E5;
+  --color-on-surface-variant: #CAC4D0;
+
+  --color-text: #E6E1E5;
+  --color-text-secondary: #CAC4D0;
+  --color-border: #938F99;
+  --color-outline: #938F99;
+
+  /* 阴影（深色模式下用亮阴影） */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== Tailwind 自定义主题 ===== */
+@theme {
+  --color-primary: var(--color-primary);
+  --color-primary-container: var(--color-primary-container);
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-text: var(--color-text);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-border: var(--color-border);
+  --color-sakura: var(--color-sakura);
+  --color-sky: var(--color-sky);
+}
+
+/* ===== 工具类 ===== */
+.container-page {
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-theme="dark"] .glass {
+  background: rgba(28, 27, 31, 0.7);
+}

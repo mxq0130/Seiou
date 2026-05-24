@@ -1,0 +1,113 @@
+---
+// 导航栏组件 - 响应式汉堡菜单
+---
+
+<nav class="sticky top-0 z-50 glass border-b" style="border-color: var(--color-border);">
+  <div class="container-page flex items-center justify-between" style="height: var(--navbar-height);">
+
+    <!-- Logo / 站点名 -->
+    <a href="/" class="text-xl font-bold no-underline flex items-center gap-2" style="color: var(--color-primary);">
+      <span class="text-2xl">🌸</span>
+      <span class="hidden sm:inline">二次元博客</span>
+    </a>
+
+    <!-- 桌面导航 -->
+    <div class="hidden md:flex items-center gap-6">
+      <a href="/" class="nav-link">首页</a>
+      <a href="/archive" class="nav-link">归档</a>
+      <a href="/docs" class="nav-link">文档</a>
+      <a href="/gallery" class="nav-link">图集</a>
+      <a href="/anime" class="nav-link">追番</a>
+      <a href="/links" class="nav-link">友链</a>
+      <a href="/about" class="nav-link">关于</a>
+      <div class="h-6 w-px" style="background: var(--color-border);"></div>
+      <ThemeToggle />
+      <a href="/login" class="nav-link text-sm font-medium px-4 py-2 rounded-full" style="background: var(--color-primary-container); color: var(--color-on-primary-container);">
+        登录
+      </a>
+    </div>
+
+    <!-- 移动端：主题切换 + 汉堡菜单按钮 -->
+    <div class="flex md:hidden items-center gap-3">
+      <ThemeToggle />
+      <button id="menu-btn" class="text-2xl leading-none p-1" style="color: var(--color-text);" aria-label="菜单">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- 移动端菜单 -->
+  <div id="mobile-menu" class="hidden md:hidden border-t" style="border-color: var(--color-border); background: var(--color-surface);">
+    <div class="container-page flex flex-col py-3 gap-1">
+      <a href="/" class="mobile-nav-link">首页</a>
+      <a href="/archive" class="mobile-nav-link">归档</a>
+      <a href="/docs" class="mobile-nav-link">文档</a>
+      <a href="/gallery" class="mobile-nav-link">图集</a>
+      <a href="/anime" class="mobile-nav-link">追番</a>
+      <a href="/links" class="mobile-nav-link">友链</a>
+      <a href="/about" class="mobile-nav-link">关于</a>
+      <a href="/login" class="mobile-nav-link font-medium" style="color: var(--color-primary);">登录</a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  import ThemeToggle from './ThemeToggle.astro';
+</script>
+
+<script>
+  // 移动端菜单切换
+  const menuBtn = document.getElementById('menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  menuBtn?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+</script>
+
+<style>
+  .nav-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.15s ease;
+    padding: 0.25rem 0;
+    position: relative;
+  }
+  .nav-link:hover {
+    color: var(--color-primary);
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--color-primary);
+    border-radius: 1px;
+    transition: width 0.2s ease;
+  }
+  .nav-link:hover::after {
+    width: 100%;
+  }
+
+  .mobile-nav-link {
+    display: block;
+    padding: 10px 16px;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 1rem;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s ease;
+  }
+  .mobile-nav-link:hover {
+    background: var(--color-primary-container);
+    color: var(--color-on-primary-container);
+  }
+</style>
