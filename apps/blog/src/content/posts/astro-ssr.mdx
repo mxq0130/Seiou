@@ -1,0 +1,66 @@
+---
+title: "Astro SSR 模式详解：从静态到动态"
+description: "深入了解 Astro 的 SSR 模式，如何为博客添加动态功能"
+category: "技术"
+tags: ["Astro", "SSR", "全栈"]
+date: 2026-05-10
+---
+
+## 为什么需要 SSR？
+
+静态生成（SSG）适合内容不常变化的页面，但博客有时需要动态功能：
+
+- 用户登录/注册
+- 评论系统
+- 搜索功能
+- 个性化推荐
+
+这时就需要**服务端渲染（SSR）**。
+
+## Astro SSR 配置
+
+### 1. 启用 SSR
+
+```js
+// astro.config.mjs
+export default defineConfig({
+  output: 'server',
+  adapter: node({
+    mode: 'standalone',
+  }),
+});
+```
+
+### 2. 混合渲染
+
+Astro 支持混合模式，可以同时使用 SSG 和 SSR：
+
+```js
+export default defineConfig({
+  output: 'hybrid',
+});
+```
+
+然后在需要的页面设置 `export const prerender = false;`
+
+## 实际应用
+
+### 文章页面（SSG）
+文章内容不常变化，使用静态生成，速度最快。
+
+### 搜索页面（SSR）
+搜索结果需要实时查询，使用 SSR。
+
+### 用户中心（SSR）
+用户数据是私有的、动态的，使用 SSR。
+
+## 性能对比
+
+| 模式 | 首次加载 | TTFB | 服务器负载 |
+|------|----------|------|------------|
+| SSG | 极快 | < 50ms | 极低 |
+| SSR | 快 | 100-300ms | 中等 |
+
+## 小结
+
+合理使用 SSG + SSR 的混合模式，可以在性能和功能之间取得最佳平衡。

@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const albums = [
+  { id: 1, name: '日常随手拍', cover: '📷', count: 15 },
+  { id: 2, name: '二次元周边', cover: '🎨', count: 23 },
+  { id: 3, name: '漫展记录', cover: '🎪', count: 8 },
+  { id: 4, name: '壁纸收藏', cover: '🖼️', count: 42 },
+  { id: 5, name: '美食探店', cover: '🍜', count: 12 },
+  { id: 6, name: '旅行相册', cover: '✈️', count: 31 },
+];
+---
+
+<Layout title="图集" description="图片集锦">
+  <div class="container-page py-8 sm:py-12">
+    <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text);">🖼️ 图集</h1>
+    <p class="mb-8" style="color: var(--color-text-secondary);">
+      记录生活中的每一个瞬间
+    </p>
+
+    <!-- 相册网格 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {albums.map((album) => (
+        <a href={`/gallery/${album.id}`} class="card overflow-hidden group no-underline">
+          <div class="h-48 flex items-center justify-center text-5xl transition-transform duration-300 group-hover:scale-110"
+            style="background: linear-gradient(135deg, var(--color-primary-container), var(--color-sakura));">
+            {album.cover}
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-semibold" style="color: var(--color-text);">{album.name}</h3>
+              <p class="text-sm mt-1" style="color: var(--color-text-secondary);">{album.count} 张图片</p>
+            </div>
+            <span class="text-lg" style="color: var(--color-text-secondary);">→</span>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <!-- 上传提示 -->
+    <div class="mt-12 p-8 text-center card">
+      <h3 class="text-xl font-bold mb-3" style="color: var(--color-text);">📤 上传图片</h3>
+      <p class="mb-4" style="color: var(--color-text-secondary);">
+        注册并登录后，即可上传图片到图集
+      </p>
+      <a href="/register" class="inline-flex items-center px-6 py-3 rounded-full font-medium transition-all"
+        style="background: var(--color-primary); color: var(--color-on-primary);">
+        注册账号
+      </a>
+    </div>
+  </div>
+</Layout>

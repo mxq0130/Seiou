@@ -7,9 +7,18 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://example.com',
+
   vite: {
     plugins: [tailwindcss()]
   },
 
-  integrations: [mdx()]
+  integrations: [mdx()],
+
+  markdown: {
+    shikiConfig: {
+      theme: 'css-variables',
+      wrap: true,
+    },
+  },
 });

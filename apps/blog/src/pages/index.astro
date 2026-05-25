@@ -1,5 +1,22 @@
 ---
+import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+import PostCard from '../components/PostCard.astro';
+
+const posts = await getCollection('posts', ({ data }) => data.status === 'published');
+const recentPosts = posts
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 6);
+
+const animeList = [
+  { title: '某科学的超电磁炮 第四季', progress: '8/24' },
+  { title: '孤独摇滚 第二季', progress: '6/12' },
+  { title: '葬送的芙莉莲', progress: '22/28' },
+  { title: '怪兽8号', progress: '3/12' },
+  { title: '魔法少女', progress: '1/12' },
+];
+
+const stats = { posts: 42, docs: 12, anime: 256, comments: '1.2k' };
 ---
 
 <Layout title="二次元个人博客" description="一个二次元风格的个人博客，分享技术、生活与热爱的一切。">
@@ -16,24 +33,16 @@ import Layout from '../layouts/Layout.astro';
         分享技术见闻、二次元生活与一切热爱的事物
       </p>
       <div class="flex flex-wrap gap-4 justify-center">
-        <a
-          href="/archive"
-          class="inline-flex items-center px-6 py-3 rounded-full font-medium transition-all duration-200 hover:shadow-md"
-          style="background: var(--color-primary); color: var(--color-on-primary);"
-        >
+        <a href="/archive" class="inline-flex items-center px-6 py-3 rounded-full font-medium transition-all duration-200 hover:shadow-md"
+          style="background: var(--color-primary); color: var(--color-on-primary);">
           浏览文章
         </a>
-        <a
-          href="/about"
-          class="inline-flex items-center px-6 py-3 rounded-full font-medium transition-all duration-200 hover:shadow-md"
-          style="background: var(--color-surface); color: var(--color-primary);"
-        >
+        <a href="/about" class="inline-flex items-center px-6 py-3 rounded-full font-medium transition-all duration-200 hover:shadow-md"
+          style="background: var(--color-surface); color: var(--color-primary);">
           关于我
         </a>
       </div>
     </div>
-
-    <!-- 装饰性圆形 -->
     <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full opacity-20" style="background: var(--color-sakura);"></div>
     <div class="absolute -bottom-20 -left-20 w-60 h-60 rounded-full opacity-15" style="background: var(--color-sky);"></div>
   </section>
@@ -46,34 +55,10 @@ import Layout from '../layouts/Layout.astro';
         查看全部 →
       </a>
     </div>
-
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {
-        [1, 2, 3].map((i) => (
-          <article class="card card-hover overflow-hidden group">
-            <!-- 封面图占位 -->
-            <div class="h-44 flex items-center justify-center text-5xl transition-transform duration-300 group-hover:scale-105"
-              style="background: linear-gradient(135deg, var(--color-primary-container), var(--color-sakura));">
-              📝
-            </div>
-            <div class="p-5">
-              <div class="flex gap-2 mb-2">
-                <span class="text-xs px-2 py-1 rounded-full" style="background: var(--color-primary-container); color: var(--color-on-primary-container);">技术</span>
-              </div>
-              <h3 class="text-lg font-semibold mb-2 line-clamp-2" style="color: var(--color-text);">
-                示例文章标题 {i} - Astro 搭建博客入门指南
-              </h3>
-              <p class="text-sm line-clamp-2 mb-3" style="color: var(--color-text-secondary);">
-                这是一篇示例文章摘要，介绍了如何使用 Astro 构建一个现代化的个人博客网站...
-              </p>
-              <div class="flex items-center justify-between text-xs" style="color: var(--color-text-secondary);">
-                <time>2026-05-{20 + i}</time>
-                <span>阅读 1.{i}k</span>
-              </div>
-            </div>
-          </article>
-        ))
-      }
+      {recentPosts.map((post) => (
+        <PostCard post={post} />
+      ))}
     </div>
   </section>
 
@@ -85,17 +70,16 @@ import Layout from '../layouts/Layout.astro';
         全部番剧 →
       </a>
     </div>
-
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-      {['约定的梦幻岛', '孤独摇滚', '夏日重现', '86-不存在的战区', '魔法少女小圆'].map((title) => (
+      {animeList.map((anime) => (
         <div class="card overflow-hidden group text-center">
           <div class="h-32 flex items-center justify-center text-3xl transition-transform duration-300 group-hover:scale-110"
             style="background: linear-gradient(135deg, var(--color-primary-container), var(--color-sky));">
             🎬
           </div>
           <div class="p-3">
-            <p class="text-sm font-medium truncate" style="color: var(--color-text);">{title}</p>
-            <p class="text-xs mt-1" style="color: var(--color-text-secondary);">更新至 12/24 话</p>
+            <p class="text-sm font-medium truncate" style="color: var(--color-text);">{anime.title}</p>
+            <p class="text-xs mt-1" style="color: var(--color-text-secondary);">更新至 {anime.progress} 话</p>
           </div>
         </div>
       ))}
@@ -107,19 +91,19 @@ import Layout from '../layouts/Layout.astro';
     <div class="card p-8">
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
         <div>
-          <div class="text-3xl font-bold" style="color: var(--color-primary);">42</div>
+          <div class="text-3xl font-bold" style="color: var(--color-primary);">{stats.posts}</div>
           <div class="text-sm mt-1" style="color: var(--color-text-secondary);">文章</div>
         </div>
         <div>
-          <div class="text-3xl font-bold" style="color: var(--color-primary);">12</div>
+          <div class="text-3xl font-bold" style="color: var(--color-primary);">{stats.docs}</div>
           <div class="text-sm mt-1" style="color: var(--color-text-secondary);">文档</div>
         </div>
         <div>
-          <div class="text-3xl font-bold" style="color: var(--color-primary);">256</div>
+          <div class="text-3xl font-bold" style="color: var(--color-primary);">{stats.anime}</div>
           <div class="text-sm mt-1" style="color: var(--color-text-secondary);">追番</div>
         </div>
         <div>
-          <div class="text-3xl font-bold" style="color: var(--color-primary);">1.2k</div>
+          <div class="text-3xl font-bold" style="color: var(--color-primary);">{stats.comments}</div>
           <div class="text-sm mt-1" style="color: var(--color-text-secondary);">评论</div>
         </div>
       </div>

@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="我的" description="个人资料">
+  <div class="container-page py-8 sm:py-12">
+    <div class="max-w-2xl mx-auto">
+
+      <!-- 个人资料卡 -->
+      <div class="card p-8 text-center mb-8">
+        <div class="w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center text-4xl"
+          style="background: linear-gradient(135deg, var(--color-primary-container), var(--color-sakura));">
+          🌸
+        </div>
+        <h2 class="text-2xl font-bold mb-1" style="color: var(--color-text);">博主名</h2>
+        <p class="mb-4" style="color: var(--color-text-secondary);">一只热爱二次元的全栈开发者</p>
+        <p class="text-sm" style="color: var(--color-text-secondary);">
+          写写代码，看看番，偶尔拍拍照 📸
+        </p>
+      </div>
+
+      <!-- 社交链接 -->
+      <div class="card p-6 mb-8">
+        <h3 class="text-lg font-semibold mb-4" style="color: var(--color-text);">社交链接</h3>
+        <div class="flex flex-wrap gap-3">
+          {[
+            { name: 'GitHub', url: 'https://github.com', icon: '💻' },
+            { name: 'Bilibili', url: 'https://space.bilibili.com', icon: '📺' },
+            { name: 'Email', url: 'mailto:hello@example.com', icon: '📧' },
+          ].map((social) => (
+            <a href={social.url} target="_blank" rel="noopener" class="flex items-center gap-2 px-4 py-2 rounded-full no-underline text-sm transition-all"
+              style="background: var(--color-surface-variant); color: var(--color-text);">
+              <span>{social.icon}</span>
+              <span>{social.name}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- 站点统计 -->
+      <div class="card p-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: var(--color-text);">站点统计</h3>
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div class="text-2xl font-bold" style="color: var(--color-primary);">42</div>
+            <div class="text-xs mt-1" style="color: var(--color-text-secondary);">文章</div>
+          </div>
+          <div>
+            <div class="text-2xl font-bold" style="color: var(--color-primary);">256</div>
+            <div class="text-xs mt-1" style="color: var(--color-text-secondary);">追番</div>
+          </div>
+          <div>
+            <div class="text-2xl font-bold" style="color: var(--color-primary);">365</div>
+            <div class="text-xs mt-1" style="color: var(--color-text-secondary);">天运行</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</Layout>

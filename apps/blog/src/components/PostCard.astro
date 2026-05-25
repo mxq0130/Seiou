@@ -1,0 +1,59 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const { title, description, cover, category, tags, date } = post.data;
+const slug = String(post.id).replace(/\.mdx?$/, '');
+const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
+  year: 'numeric', month: 'long', day: 'numeric'
+});
+
+// 估算阅读时间
+const wordCount = post.body?.length || 0;
+const readingTime = Math.max(1, Math.ceil(wordCount / 300));
+---
+
+<article class="card overflow-hidden group h-full flex flex-col">
+  <!-- 封面图 -->
+  <a href={`/posts/${slug}`} class="h-44 overflow-hidden">
+    <div class="h-full w-full flex items-center justify-center text-4xl transition-transform duration-300 group-hover:scale-105"
+      style="background: linear-gradient(135deg, var(--color-primary-container), var(--color-sakura));">
+      {cover ? <img src={cover} alt={title} class="h-full w-full object-cover" /> : '📝'}
+    </div>
+  </a>
+
+  <div class="p-5 flex flex-col flex-1">
+    <!-- 分类标签 -->
+    <div class="flex gap-2 mb-2">
+      {category && (
+        <span class="text-xs px-2 py-1 rounded-full" style="background: var(--color-primary-container); color: var(--color-on-primary-container);">
+          {category}
+        </span>
+      )}
+    </div>
+
+    <!-- 标题 -->
+    <a href={`/posts/${slug}`} class="no-underline mb-2">
+      <h3 class="text-lg font-semibold line-clamp-2 group-hover:underline" style="color: var(--color-text);">
+        {title}
+      </h3>
+    </a>
+
+    <!-- 摘要 -->
+    {description && (
+      <p class="text-sm line-clamp-2 mb-3 flex-1" style="color: var(--color-text-secondary);">
+        {description}
+      </p>
+    )}
+
+    <!-- 元信息 -->
+    <div class="flex items-center justify-between text-xs mt-auto" style="color: var(--color-text-secondary);">
+      <time datetime={date.toISOString()}>{formattedDate}</time>
+      <span>{readingTime} 分钟阅读</span>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import PostCard from '../components/PostCard.astro';
+
+const posts = await getCollection('posts', ({ data }) => data.status === 'published');
+const sorted = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// 按年份分组
+const groupedByYear = new Map<number, typeof posts>();
+for (const post of sorted) {
+  const year = new Date(post.data.date).getFullYear();
+  if (!groupedByYear.has(year)) groupedByYear.set(year, []);
+  groupedByYear.get(year)!.push(post);
+}
+
+// 获取所有分类和标签
+const categories = [...new Set(posts.map((p) => p.data.category).filter(Boolean))] as string[];
+const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+---
+
+<Layout title="文章归档" description="所有文章归档">
+  <div class="container-page py-8 sm:py-12">
+    <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text);">文章归档</h1>
+    <p class="mb-8" style="color: var(--color-text-secondary);">
+      共 {posts.length} 篇文章
+    </p>
+
+    <!-- 分类筛选 -->
+    <div class="flex flex-wrap gap-2 mb-8">
+      <a href="/archive" class="text-xs px-3 py-1 rounded-full no-underline font-medium"
+        style="background: var(--color-primary-container); color: var(--color-on-primary-container);">
+        全部
+      </a>
+      {categories.map((cat) => (
+        <a href={`/archive?category=${cat}`} class="text-xs px-3 py-1 rounded-full no-underline"
+          style="background: var(--color-surface-variant); color: var(--color-on-surface-variant);">
+          {cat}
+        </a>
+      ))}
+    </div>
+
+    <!-- 文章时间轴 -->
+    <div class="space-y-12">
+      {Array.from(groupedByYear.entries()).map(([year, yearPosts]) => (
+        <div>
+          <h2 class="text-2xl font-bold mb-6 sticky top-16 z-10 py-2" style="background: var(--color-bg); color: var(--color-primary);">
+            {year}
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {yearPosts.map((post) => (
+              <PostCard post={post} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</Layout>

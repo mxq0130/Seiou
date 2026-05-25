@@ -1,0 +1,113 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import PostCard from '../../components/PostCard.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => data.status === 'published');
+  return posts.map((post) => ({
+    params: { slug: String(post.id).replace(/\.mdx?$/, '') },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const postSlug = String(post.id).replace(/\.mdx?$/, '');
+const { title, description, category, tags, date, updated } = post.data;
+
+// 渲染 MDX
+const { Content, headings } = await render(post);
+
+const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
+  year: 'numeric', month: 'long', day: 'numeric',
+});
+const formattedUpdated = updated
+  ? new Date(updated).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+  : null;
+
+// 获取相关文章（同分类或同标签）
+const allPosts = await getCollection('posts', ({ data }) => data.status === 'published');
+const relatedPosts = allPosts
+  .filter((p) => String(p.id).replace(/\.mdx?$/, '') !== postSlug && (p.data.category === category || p.data.tags?.some((t) => tags?.includes(t))))
+  .slice(0, 3);
+---
+
+<Layout title={title} description={description}>
+  <article class="container-page py-8 sm:py-12">
+    <div class="max-w-3xl mx-auto">
+
+      <!-- 文章头部 -->
+      <header class="mb-8">
+        {/* 分类 + 标签 */}
+        <div class="flex flex-wrap gap-2 mb-4">
+          {category && (
+            <a href={`/archive?category=${category}`} class="text-xs px-3 py-1 rounded-full no-underline font-medium"
+              style="background: var(--color-primary-container); color: var(--color-on-primary-container);">
+              {category}
+            </a>
+          )}
+          {tags?.map((tag) => (
+            <a href={`/archive?tag=${tag}`} class="text-xs px-2 py-1 rounded-full no-underline"
+              style="background: var(--color-surface-variant); color: var(--color-on-surface-variant);">
+              #{tag}
+            </a>
+          ))}
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl font-bold mb-4" style="color: var(--color-text);">
+          {title}
+        </h1>
+
+        {description && (
+          <p class="text-lg mb-4" style="color: var(--color-text-secondary);">
+            {description}
+          </p>
+        )}
+
+        <div class="flex flex-wrap items-center gap-4 text-sm" style="color: var(--color-text-secondary);">
+          <time datetime={date.toISOString()}>发布于 {formattedDate}</time>
+          {formattedUpdated && <span>更新于 {formattedUpdated}</span>}
+          <span>约 {Math.max(1, Math.ceil(post.body?.length / 300))} 分钟阅读</span>
+        </div>
+      </header>
+
+      <div class="flex gap-8 lg:gap-12">
+        {/* 文章正文 */}
+        <div class="flex-1 min-w-0">
+          <div class="prose">
+            <Content />
+          </div>
+
+          {/* 文章底部导航 */}
+          <div class="mt-12 pt-6 border-t" style="border-color: var(--color-border);">
+            <a href="/archive" class="text-sm font-medium no-underline" style="color: var(--color-primary);">
+              ← 返回归档
+            </a>
+          </div>
+        </div>
+
+        {/* 侧边栏：目录 */}
+        <aside class="hidden lg:block w-56 shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+      </div>
+    </div>
+  </article>
+
+  {/* 相关文章 */}
+  {relatedPosts.length > 0 && (
+    <section class="container-page py-8 sm:py-12">
+      <h2 class="text-2xl font-bold mb-6" style="color: var(--color-text);">相关文章</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {relatedPosts.map((rp) => (
+          <PostCard post={rp} />
+        ))}
+      </div>
+    </section>
+  )}
+</Layout>

@@ -1,0 +1,60 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="注册" description="注册二次元博客账号">
+  <div class="container-page py-12 sm:py-20">
+    <div class="max-w-md mx-auto">
+      <div class="card p-8">
+        <div class="text-center mb-8">
+          <span class="text-5xl mb-4 block">🎉</span>
+          <h1 class="text-2xl font-bold" style="color: var(--color-text);">创建账号</h1>
+          <p class="text-sm mt-2" style="color: var(--color-text-secondary);">加入二次元博客社区</p>
+        </div>
+
+        <form class="flex flex-col gap-4">
+          <div>
+            <label for="username" class="block text-sm font-medium mb-1" style="color: var(--color-text);">用户名</label>
+            <input
+              type="text" id="username" name="username" placeholder="你的昵称"
+              class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-colors"
+              style="background: var(--color-bg); border-color: var(--color-border); color: var(--color-text);"
+            />
+          </div>
+
+          <div>
+            <label for="email" class="block text-sm font-medium mb-1" style="color: var(--color-text);">邮箱</label>
+            <input
+              type="email" id="email" name="email" placeholder="your@email.com"
+              class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-colors"
+              style="background: var(--color-bg); border-color: var(--color-border); color: var(--color-text);"
+            />
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium mb-1" style="color: var(--color-text);">密码</label>
+            <input
+              type="password" id="password" name="password" placeholder="至少6位密码"
+              class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-colors"
+              style="background: var(--color-bg); border-color: var(--color-border); color: var(--color-text);"
+            />
+          </div>
+
+          <button type="submit" class="w-full py-2.5 rounded-lg font-medium text-sm transition-all cursor-pointer mt-2"
+            style="background: var(--color-primary); color: var(--color-on-primary); border: none;">
+            注册
+          </button>
+        </form>
+
+        <p class="mt-4 text-xs text-center" style="color: var(--color-text-secondary);">
+          注册即表示同意本站的服务条款和隐私政策
+        </p>
+
+        <div class="mt-6 text-center text-sm" style="color: var(--color-text-secondary);">
+          已有账号？
+          <a href="/login" class="font-medium ml-1 hover:underline" style="color: var(--color-primary);">立即登录</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

@@ -156,3 +156,146 @@
 [data-theme="dark"] .glass {
   background: rgba(28, 27, 31, 0.7);
 }
+
+/* ===== Shiki 代码高亮变量 ===== */
+:root {
+  --astro-code-color-text: #1C1B1F;
+  --astro-code-color-background: #F5F5F5;
+  --astro-code-token-constant: #6750A4;
+  --astro-code-token-string: #2E7D32;
+  --astro-code-token-comment: #9E9E9E;
+  --astro-code-token-keyword: #C62828;
+  --astro-code-token-parameter: #E65100;
+  --astro-code-token-function: #1565C0;
+  --astro-code-token-string-expression: #2E7D32;
+  --astro-code-token-punctuation: #49454F;
+  --astro-code-token-link: #1565C0;
+}
+
+[data-theme="dark"] {
+  --astro-code-color-text: #E6E1E5;
+  --astro-code-color-background: #1E1E1E;
+  --astro-code-token-constant: #D0BCFF;
+  --astro-code-token-string: #A5D6A7;
+  --astro-code-token-comment: #757575;
+  --astro-code-token-keyword: #EF9A9A;
+  --astro-code-token-parameter: #FFCC80;
+  --astro-code-token-function: #90CAF9;
+  --astro-code-token-string-expression: #A5D6A7;
+  --astro-code-token-punctuation: #CAC4D0;
+  --astro-code-token-link: #90CAF9;
+}
+
+/* ===== 代码块样式 ===== */
+pre.astro-code {
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  margin: 1rem 0;
+}
+
+pre.astro-code code {
+  font-family: inherit;
+}
+
+/* ===== 文章内容样式 ===== */
+.prose {
+  color: var(--color-text);
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: var(--color-text);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.prose h1 { font-size: 2rem; }
+.prose h2 { font-size: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; }
+.prose h3 { font-size: 1.25rem; }
+
+.prose p {
+  margin-bottom: 1rem;
+}
+
+.prose a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose a:hover {
+  opacity: 0.85;
+}
+
+.prose blockquote {
+  border-left: 4px solid var(--color-primary);
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.prose blockquote p {
+  margin: 0;
+}
+
+.prose ul, .prose ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose li {
+  margin-bottom: 0.25rem;
+}
+
+.prose img {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  margin: 1rem 0;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+
+.prose th, .prose td {
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.prose th {
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  font-weight: 600;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2rem 0;
+}
+
+.prose code {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.9em;
+  background: var(--color-surface-variant);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+.prose pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}

@@ -1,0 +1,70 @@
+---
+interface AnimeItem {
+  title: string;
+  cover: string;
+  progress: number;
+  total: number;
+  rating: number;
+  status: string;
+  note?: string;
+}
+
+interface Props {
+  anime: AnimeItem;
+  compact?: boolean;
+}
+
+const { anime, compact = false } = Astro.props;
+const progressPercent = anime.total > 0 ? Math.round((anime.progress / anime.total) * 100) : 0;
+
+const statusLabel: Record<string, string> = {
+  watching: '追番中', completed: '已看完', planning: '想看', dropped: '已弃番',
+};
+const statusColor: Record<string, string> = {
+  watching: 'var(--color-sky)', completed: 'var(--color-mint)', planning: 'var(--color-warm)', dropped: 'var(--color-text-secondary)',
+};
+---
+
+{compact ? (
+  <div class="card p-4 flex items-center gap-3">
+    <span class="text-2xl shrink-0">{anime.cover}</span>
+    <div class="min-w-0 flex-1">
+      <p class="font-medium truncate text-sm" style="color: var(--color-text);">{anime.title}</p>
+      <p class="text-xs mt-0.5" style="color: var(--color-text-secondary);">
+        {statusLabel[anime.status]}
+        {anime.note ? ` · ${anime.note}` : ''}
+      </p>
+    </div>
+  </div>
+) : (
+  <div class="card overflow-hidden group">
+    <div class="h-36 flex items-center justify-center text-4xl transition-transform duration-300 group-hover:scale-110"
+      style="background: linear-gradient(135deg, var(--color-primary-container), var(--color-sakura));">
+      {anime.cover}
+    </div>
+    <div class="p-4">
+      <h3 class="font-semibold truncate mb-2" style="color: var(--color-text);">{anime.title}</h3>
+      <div class="flex items-center gap-2 mb-2">
+        <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background: var(--color-surface-variant);">
+          <div class="h-full rounded-full transition-all" style={`width: ${progressPercent}%; background: var(--color-primary);`}></div>
+        </div>
+        <span class="text-xs shrink-0" style="color: var(--color-text-secondary);">
+          {anime.progress}/{anime.total}
+        </span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-xs px-2 py-0.5 rounded-full" style={`background: ${statusColor[anime.status]}20; color: ${statusColor[anime.status]};`}>
+          {statusLabel[anime.status]}
+        </span>
+        {anime.rating > 0 && (
+          <span class="text-xs" style="color: var(--color-warm);">
+            {'⭐'.repeat(anime.rating)}
+          </span>
+        )}
+      </div>
+      {anime.note && (
+        <p class="text-xs mt-2 italic" style="color: var(--color-text-secondary);">{anime.note}</p>
+      )}
+    </div>
+  </div>
+)}

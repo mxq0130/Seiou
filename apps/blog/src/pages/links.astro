@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const links = [
+  { name: 'Astro 官方文档', url: 'https://docs.astro.build', avatar: '🚀', description: '现代化的静态网站生成器' },
+  { name: 'Tailwind CSS', url: 'https://tailwindcss.com', avatar: '🎨', description: '原子化 CSS 框架' },
+  { name: 'Bilibili', url: 'https://www.bilibili.com', avatar: '📺', description: '二次元弹幕视频网站' },
+  { name: 'Bangumi', url: 'https://bgm.tv', avatar: '📋', description: '番剧数据库' },
+  { name: 'GitHub', url: 'https://github.com', avatar: '💻', description: '全球最大代码托管平台' },
+  { name: 'MDN', url: 'https://developer.mozilla.org', avatar: '📖', description: 'Web 开发文档' },
+];
+---
+
+<Layout title="友链" description="友情链接">
+  <div class="container-page py-8 sm:py-12">
+    <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text);">🔗 友链</h1>
+    <p class="mb-8" style="color: var(--color-text-secondary);">
+      一些值得推荐的站点
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {links.map((link) => (
+        <a href={link.url} target="_blank" rel="noopener noreferrer" class="card p-5 no-underline flex items-start gap-4 group">
+          <span class="text-3xl shrink-0">{link.avatar}</span>
+          <div class="min-w-0">
+            <h3 class="font-semibold text-base truncate group-hover:underline" style="color: var(--color-text);">
+              {link.name}
+            </h3>
+            <p class="text-sm mt-1 line-clamp-2" style="color: var(--color-text-secondary);">
+              {link.description}
+            </p>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <!-- 申请友链 -->
+    <div class="mt-12 p-8 text-center card">
+      <h3 class="text-xl font-bold mb-3" style="color: var(--color-text);">💌 申请友链</h3>
+      <p class="mb-4" style="color: var(--color-text-secondary);">
+        想交换友链？在评论区留言你的站点信息，审核通过后我会添加。
+      </p>
+      <p class="text-sm" style="color: var(--color-text-secondary);">
+        需要提供：站点名称、链接、头像、描述
+      </p>
+    </div>
+  </div>
+</Layout>
