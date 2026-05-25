@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== 用户表 =====
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @db.VarChar(50)
+  email     String    @unique @db.VarChar(100)
+  password  String    @db.VarChar(255)
+  avatar    String?   @db.VarChar(500)
+  role      Role      @default(USER)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  posts    Post[]
+  comments Comment[]
+  images   Image[]
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+// ===== 分类表 =====
+model Category {
+  id   Int       @id @default(autoincrement())
+  name String    @db.VarChar(50)
+  slug String    @unique @db.VarChar(50)
+  type CateType
+  posts Post[]
+
+  @@map("categories")
+}
+
+enum CateType {
+  POST
+  DOC
+}
+
+// ===== 标签表 =====
+model Tag {
+  id   Int       @id @default(autoincrement())
+  name String    @db.VarChar(50)
+  slug String    @unique @db.VarChar(50)
+  posts PostTag[]
+
+  @@map("tags")
+}
+
+// ===== 文章表 =====
+model Post {
+  id         Int        @id @default(autoincrement())
+  title      String     @db.VarChar(200)
+  slug       String     @unique @db.VarChar(200)
+  content    String     @db.LongText
+  excerpt    String?    @db.VarChar(500)
+  cover      String?    @db.VarChar(500)
+  status     PostStatus @default(DRAFT)
+  viewCount  Int        @default(0) @map("view_count")
+  authorId   Int        @map("author_id")
+  categoryId Int?       @map("category_id")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  author   User      @relation(fields: [authorId], references: [id])
+  category Category? @relation(fields: [categoryId], references: [id])
+  tags     PostTag[]
+
+  @@map("posts")
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// ===== 文章标签关联 =====
+model PostTag {
+  postId Int @map("post_id")
+  tagId  Int @map("tag_id")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+// ===== 文档表 =====
+model Doc {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(200)
+  slug      String   @unique @db.VarChar(200)
+  content   String   @db.LongText
+  parentId  Int?     @map("parent_id")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  parent   Doc?  @relation("DocTree", fields: [parentId], references: [id])
+  children Doc[] @relation("DocTree")
+
+  @@map("docs")
+}
+
+// ===== 相册表 =====
+model Album {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  coverUrl    String?  @db.VarChar(500) @map("cover_url")
+  description String?  @db.VarChar(500)
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  images Image[]
+
+  @@map("albums")
+}
+
+// ===== 图片表 =====
+model Image {
+  id         Int      @id @default(autoincrement())
+  url        String   @db.VarChar(500)
+  albumId    Int?     @map("album_id")
+  uploaderId Int      @map("uploader_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  album    Album? @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  uploader User  @relation(fields: [uploaderId], references: [id])
+
+  @@map("images")
+}
+
+// ===== 追番表 =====
+model Anime {
+  id         Int          @id @default(autoincrement())
+  title      String       @db.VarChar(200)
+  cover      String?      @db.VarChar(500)
+  bilibiliId String?      @db.VarChar(50) @map("bilibili_id")
+  progress   Int          @default(0)
+  total      Int          @default(0)
+  rating     Int          @default(0)
+  status     AnimeStatus  @default(WATCHING)
+  note       String?      @db.VarChar(500)
+  syncedAt   DateTime?    @map("synced_at")
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  @@map("anime_list")
+}
+
+enum AnimeStatus {
+  WATCHING
+  COMPLETED
+  PLANNING
+  DROPPED
+}
+
+// ===== 友链表 =====
+model Link {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  url         String   @db.VarChar(500)
+  avatar      String?  @db.VarChar(500)
+  description String?  @db.VarChar(300)
+  approved    Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("links")
+}
+
+// ===== 评论表 =====
+model Comment {
+  id         Int          @id @default(autoincrement())
+  content    String       @db.Text
+  userId     Int          @map("user_id")
+  targetType TargetType   @map("target_type")
+  targetId   Int          @map("target_id")
+  parentId   Int?         @map("parent_id")
+  approved   Boolean      @default(true)
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  user     User       @relation(fields: [userId], references: [id])
+  parent   Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[]  @relation("CommentReplies")
+
+  @@map("comments")
+}
+
+enum TargetType {
+  POST
+  DOC
+  IMAGE
+}
+
+// ===== 站点设置 =====
+model SiteSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(100)
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
