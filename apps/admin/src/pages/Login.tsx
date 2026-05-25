@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (values: { email: string; password: string }) => {
+  const handleLogin = async (values: { username: string; password: string }) => {
     setLoading(true);
     try {
       const res: any = await login(values);
@@ -52,8 +52,8 @@ export default function LoginPage() {
               label: '登录',
               children: (
                 <Form onFinish={handleLogin} layout="vertical" size="large">
-                  <Form.Item name="email" rules={[{ required: true, type: 'email', message: '请输入邮箱' }]}>
-                    <Input prefix={<MailOutlined />} placeholder="邮箱" />
+                  <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
+                    <Input prefix={<UserOutlined />} placeholder="用户名" />
                   </Form.Item>
                   <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
                     <Input.Password prefix={<LockOutlined />} placeholder="密码" />
