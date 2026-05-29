@@ -2,60 +2,89 @@
 import '../styles/global.css';
 import NavBar from '../components/NavBar.astro';
 import Footer from '../components/Footer.astro';
+import Sidebar from '../components/Sidebar.astro';
 
-interface Props {
-  title?: string;
+export interface Props {
+  title: string;
   description?: string;
+  image?: string;
+  ogType?: string;
+  noSidebar?: boolean;
 }
-const { title, description } = Astro.props;
-const pageTitle = title ? `${title} - 二次元博客` : '二次元个人博客';
-const pageDescription = description || '一个二次元风格的个人博客';
+
+const {
+  title,
+  description = '二次元风格个人博客 - 记录生活与技术',
+  image,
+  ogType = 'website',
+  noSidebar = false,
+} = Astro.props;
+
+const siteTitle = '🌸 小破站';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://example.com').href;
 ---
-<!doctype html>
-<html lang="zh-CN" data-theme="light">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={pageDescription} />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} | {siteTitle}</title>
+  <meta name="description" content={description} />
 
-    <title>{pageTitle}</title>
-  </head>
-  <body class="min-h-screen flex flex-col">
-    <!-- 主题预加载 - 防止闪烁 -->
-    <script is:inline>
-      (function() {
-        var saved = localStorage.getItem('theme');
-        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = saved || (prefers ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
-      })();
-    </script>
+  <meta property="og:title" content={`${title} | ${siteTitle}`} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:url" content={canonicalURL} />
+  {image && <meta property="og:image" content={image} />}
 
-    <NavBar />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={`${title} | ${siteTitle}`} />
+  <meta name="twitter:description" content={description} />
+  {image && <meta name="twitter:image" content={image} />}
 
-    <main class="flex-1">
-      <slot />
-    </main>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': ogType === 'article' ? 'BlogPosting' : 'WebSite',
+    name: siteTitle, description, url: canonicalURL,
+  })}></script>
 
-    <Footer />
-  </body>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&family=ZCOOL+KuaiLe&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate" type="application/rss+xml" title={`${siteTitle} RSS`} href="/rss.xml" />
+  <link rel="canonical" href={canonicalURL} />
+</head>
+
+<body class="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
+  <NavBar />
+  <main class="flex-1">
+    {noSidebar ? (
+      <div class="page-enter max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <slot />
+      </div>
+    ) : (
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+          <div class="flex-1 min-w-0 page-enter"><slot /></div>
+          <aside class="lg:w-80 xl:w-88 shrink-0">
+            <div class="lg:sticky lg:top-24 space-y-5"><Sidebar /></div>
+          </aside>
+        </div>
+      </div>
+    )}
+  </main>
+  <Footer />
+</body>
 </html>
 
-<style>
-  html,
-  body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-  }
-</style>
+<script is:inline>
+  (function() {
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark' || (!stored && matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>

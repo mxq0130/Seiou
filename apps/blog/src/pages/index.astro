@@ -1,123 +1,26 @@
 ---
-import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+import Banner from '../components/Banner.astro';
 import PostCard from '../components/PostCard.astro';
 
-const posts = await getCollection('posts', ({ data }) => data.status === 'published');
-const recentPosts = posts
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 6);
-
-const animeList = [
-  { title: '某科学的超电磁炮 第四季', progress: '8/24' },
-  { title: '孤独摇滚 第二季', progress: '6/12' },
-  { title: '葬送的芙莉莲', progress: '22/28' },
-  { title: '怪兽8号', progress: '3/12' },
-  { title: '魔法少女', progress: '1/12' },
+const posts = [
+  { title: 'Markdown 写作完全指南', slug: 'markdown-guide', excerpt: '掌握 Markdown 的所有语法，包括扩展功能如数学公式、Mermaid 图表、代码块增强等。', cover: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop', category: '示例文章', tags: ['Markdown', 'Blogging'], date: '2025-01-20', readingTime: 8, pinned: true },
+  { title: '加密文章示例', slug: 'encrypted-post', excerpt: '这篇文章已被加密，需要输入密码才能查看内容。', category: '技术分享', tags: ['Encryption', 'Test'], date: '2024-01-15', readingTime: 3 },
+  { title: 'Markdown 扩展功能展示', slug: 'markdown-extended', excerpt: '了解 Mizuki 主题提供的 Markdown 扩展功能：Callout 提示框、GitHub 卡片、视频嵌入等。', cover: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop', category: '示例文章', tags: ['Markdown', 'Demo', 'Example', 'Mizuki'], date: '2024-05-01', readingTime: 5 },
+  { title: 'Mizuki 主题简易上手指南', slug: 'mizuki-guide', excerpt: '如何快速上手使用 Mizuki 博客主题，包括配置修改、文章编写和部署上线。', category: '使用指南', tags: ['Mizuki', 'Blogging', 'Customization'], date: '2024-04-01', readingTime: 6 },
+  { title: '在文章中嵌入 Mermaid 图表', slug: 'mermaid-demo', excerpt: '使用 Mermaid 在文章中绘制流程图、时序图、甘特图等。', cover: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop', category: '示例文章', tags: ['Markdown', 'Mermaid'], date: '2023-10-01', readingTime: 4 },
+  { title: '在文章中嵌入视频', slug: 'video-post', excerpt: '这篇文章演示如何在博客文章中嵌入 Bilibili / YouTube 视频。', category: '示例文章', tags: ['Example', 'Video'], date: '2022-08-01', readingTime: 2 },
 ];
-
-const stats = { posts: 42, docs: 12, anime: 256, comments: '1.2k' };
 ---
 
-<Layout title="二次元个人博客" description="一个二次元风格的个人博客，分享技术、生活与热爱的一切。">
-
-  <!-- Hero 区域 -->
-  <section class="relative overflow-hidden" style="background: linear-gradient(135deg, var(--color-primary-container), var(--color-sakura) 50%, var(--color-sky));">
-    <div class="container-page py-16 sm:py-24 lg:py-32 text-center relative z-10">
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4" style="color: var(--color-on-primary-container);">
-        <span class="inline-block animate-bounce-subtle" style="animation-delay: 0s;">🌸</span>
-        {' 二次元博客'}
-        <span class="inline-block animate-bounce-subtle" style="animation-delay: 0.2s;">🌸</span>
-      </h1>
-      <p class="text-lg sm:text-xl max-w-2xl mx-auto mb-8" style="color: var(--color-on-primary-container); opacity: 0.85;">
-        分享技术见闻、二次元生活与一切热爱的事物
-      </p>
-      <div class="flex flex-wrap gap-4 justify-center">
-        <a href="/archive" class="inline-flex items-center px-6 py-3 rounded-full font-medium transition-all duration-200 hover:shadow-md"
-          style="background: var(--color-primary); color: var(--color-on-primary);">
-          浏览文章
-        </a>
-        <a href="/about" class="inline-flex items-center px-6 py-3 rounded-full font-medium transition-all duration-200 hover:shadow-md"
-          style="background: var(--color-surface); color: var(--color-primary);">
-          关于我
-        </a>
-      </div>
-    </div>
-    <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full opacity-20" style="background: var(--color-sakura);"></div>
-    <div class="absolute -bottom-20 -left-20 w-60 h-60 rounded-full opacity-15" style="background: var(--color-sky);"></div>
-  </section>
-
-  <!-- 最新文章 -->
-  <section class="container-page py-12 sm:py-16">
-    <div class="flex items-center justify-between mb-8">
-      <h2 class="text-2xl font-bold" style="color: var(--color-text);">最新文章</h2>
-      <a href="/archive" class="text-sm font-medium hover:underline" style="color: var(--color-primary);">
-        查看全部 →
-      </a>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {recentPosts.map((post) => (
-        <PostCard post={post} />
-      ))}
-    </div>
-  </section>
-
-  <!-- 追番动态 -->
-  <section class="container-page py-12 sm:py-16">
-    <div class="flex items-center justify-between mb-8">
-      <h2 class="text-2xl font-bold" style="color: var(--color-text);">追番动态</h2>
-      <a href="/anime" class="text-sm font-medium hover:underline" style="color: var(--color-primary);">
-        全部番剧 →
-      </a>
-    </div>
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-      {animeList.map((anime) => (
-        <div class="card overflow-hidden group text-center">
-          <div class="h-32 flex items-center justify-center text-3xl transition-transform duration-300 group-hover:scale-110"
-            style="background: linear-gradient(135deg, var(--color-primary-container), var(--color-sky));">
-            🎬
-          </div>
-          <div class="p-3">
-            <p class="text-sm font-medium truncate" style="color: var(--color-text);">{anime.title}</p>
-            <p class="text-xs mt-1" style="color: var(--color-text-secondary);">更新至 {anime.progress} 话</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </section>
-
-  <!-- 网站统计 -->
-  <section class="container-page py-12 sm:py-16">
-    <div class="card p-8">
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-        <div>
-          <div class="text-3xl font-bold" style="color: var(--color-primary);">{stats.posts}</div>
-          <div class="text-sm mt-1" style="color: var(--color-text-secondary);">文章</div>
-        </div>
-        <div>
-          <div class="text-3xl font-bold" style="color: var(--color-primary);">{stats.docs}</div>
-          <div class="text-sm mt-1" style="color: var(--color-text-secondary);">文档</div>
-        </div>
-        <div>
-          <div class="text-3xl font-bold" style="color: var(--color-primary);">{stats.anime}</div>
-          <div class="text-sm mt-1" style="color: var(--color-text-secondary);">追番</div>
-        </div>
-        <div>
-          <div class="text-3xl font-bold" style="color: var(--color-primary);">{stats.comments}</div>
-          <div class="text-sm mt-1" style="color: var(--color-text-secondary);">评论</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
+<Layout title="首页">
+  <Banner />
+  <div class="space-y-6">
+    {posts.map(post => <PostCard {...post} />)}
+  </div>
+  <nav class="flex items-center justify-center gap-2 mt-10">
+    <span class="px-4 py-2 rounded-lg text-sm text-[var(--color-text-secondary)] bg-[var(--color-surface)] cursor-not-allowed">上一页</span>
+    <span class="px-3 py-2 rounded-lg text-sm font-medium bg-[var(--color-primary)] text-white">1</span>
+    <span class="px-4 py-2 rounded-lg text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary-light)] transition-all cursor-pointer">下一页</span>
+  </nav>
 </Layout>
-
-<style>
-  @keyframes bounce-subtle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-  }
-  .animate-bounce-subtle {
-    animation: bounce-subtle 2s ease-in-out infinite;
-  }
-</style>

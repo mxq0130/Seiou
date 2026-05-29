@@ -1,89 +1,51 @@
 ---
-import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
-import PostCard from '../components/PostCard.astro';
 
-const allPosts = await getCollection('posts', ({ data }) => data.status === 'published');
-const recent = allPosts
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 6);
+const allPosts = [
+  { title: 'Markdown 写作完全指南', slug: 'markdown-guide', excerpt: '掌握 Markdown 的所有语法', category: '示例文章', tags: ['Markdown', 'Blogging'], date: '2025-01-20' },
+  { title: '加密文章示例', slug: 'encrypted-post', excerpt: '这篇文章已被加密', category: '技术分享', tags: ['Encryption', 'Test'], date: '2024-01-15' },
+  { title: 'Markdown 扩展功能展示', slug: 'markdown-extended', excerpt: '了解 Mizuki 的 Markdown 扩展', category: '示例文章', tags: ['Markdown', 'Demo', 'Example', 'Mizuki'], date: '2024-05-01' },
+  { title: 'Mizuki 主题上手指南', slug: 'mizuki-guide', excerpt: '快速上手 Mizuki 博客主题', category: '使用指南', tags: ['Mizuki', 'Blogging', 'Customization'], date: '2024-04-01' },
+  { title: 'Mermaid 图表嵌入', slug: 'mermaid-demo', excerpt: '在文章中使用 Mermaid 图表', category: '示例文章', tags: ['Markdown', 'Mermaid'], date: '2023-10-01' },
+  { title: '嵌入视频文章', slug: 'video-post', excerpt: '在博客文章中嵌入视频', category: '示例文章', tags: ['Example', 'Video'], date: '2022-08-01' },
+];
 
-// 构建搜索索引数据
-const searchData = allPosts.map((p) => ({
-  slug: String(p.id).replace(/\.mdx?$/, ''),
-  title: p.data.title,
-  description: p.data.description || '',
-  category: p.data.category || '',
-  tags: p.data.tags || [],
-  date: p.data.date.toISOString(),
-}));
+const query = (Astro.url.searchParams.get('q') || '').toLowerCase().trim();
+const results = query ? allPosts.filter(p => p.title.toLowerCase().includes(query) || p.excerpt.toLowerCase().includes(query) || p.tags.some(t => t.toLowerCase().includes(query))) : [];
 ---
 
-<Layout title="搜索" description="搜索博客文章">
-  <div class="container-page py-8 sm:py-12">
-    <div class="max-w-2xl mx-auto">
-      <h1 class="text-3xl font-bold mb-2 text-center" style="color: var(--color-text);">🔍 搜索文章</h1>
-      <p class="mb-8 text-center" style="color: var(--color-text-secondary);">
-        搜索已收录的 {allPosts.length} 篇文章
-      </p>
-
-      <!-- 搜索框 -->
-      <div class="mb-12">
-        <input
-          type="search"
-          id="search-input"
-          placeholder="输入关键词搜索..."
-          class="w-full px-5 py-3 rounded-lg border text-base outline-none transition-colors"
-          style="background: var(--color-surface); border-color: var(--color-border); color: var(--color-text);"
-          autofocus
-        />
-        <div id="search-results" class="mt-4 space-y-3"></div>
+<Layout title="搜索">
+  <div class="max-w-2xl">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-6 gradient-text" style="font-family: var(--font-heading)">🔍 搜索</h1>
+    <form action="/search" method="get" class="mb-8">
+      <div class="relative">
+        <input type="text" name="q" value={query} placeholder="搜索文章..." autocomplete="off" class="w-full px-5 py-3 pl-11 rounded-xl glass border border-[var(--color-border)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-primary)] transition-colors" />
+        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        {query && <a href="/search" class="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)]">✕</a>}
       </div>
-
-      <!-- 最近文章 -->
-      <h2 class="text-xl font-bold mb-4" style="color: var(--color-text);">最近文章</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {recent.map((post) => (
-          <PostCard post={post} />
-        ))}
-      </div>
-    </div>
+    </form>
+    {query ? (
+      results.length > 0 ? (
+        <div>
+          <p class="text-sm text-[var(--color-text-secondary)] mb-4">找到 {results.length} 条结果</p>
+          <div class="space-y-4">
+            {results.map(post => (
+              <a href={`/posts/${post.slug}`} class="block glass rounded-xl p-5 card-accent transition-all hover:-translate-y-1" style="box-shadow: var(--shadow-card)">
+                <h3 class="text-base font-semibold text-[var(--color-text)] mb-1" style="font-family: var(--font-heading)">{post.title}</h3>
+                <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-2">{post.excerpt}</p>
+                <div class="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
+                  <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)]">{post.category}</span>
+                  {post.tags.map(tag => <span>#{tag}</span>)}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div class="text-center py-16"><div class="text-5xl mb-4">🔍</div><p class="text-[var(--color-text-secondary)]">没有找到相关内容</p></div>
+      )
+    ) : (
+      <div class="text-center py-16 text-[var(--color-text-secondary)]"><div class="text-5xl mb-4">🔍</div><p>输入关键词搜索文章</p></div>
+    )}
   </div>
 </Layout>
-
-<script>
-  // 服务端序列化的搜索数据
-  const searchIndex = JSON.parse(`{JSON.stringify(searchData)}`);
-
-  const input = document.getElementById('search-input') as HTMLInputElement;
-  const results = document.getElementById('search-results') as HTMLDivElement;
-
-  input?.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
-    if (!q) {
-      results.innerHTML = '';
-      return;
-    }
-
-    const matched = searchIndex.filter(
-      (item: any) =>
-        item.title.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q) ||
-        item.category.toLowerCase().includes(q) ||
-        item.tags.some((t: string) => t.toLowerCase().includes(q))
-    );
-
-    results.innerHTML = matched.length > 0
-      ? matched.map((item: any) => `
-        <a href="/posts/${item.slug}" class="card p-4 block no-underline">
-          <div class="flex items-center gap-2 mb-1">
-            ${item.category ? `<span class="text-xs px-2 py-0.5 rounded-full" style="background: var(--color-primary-container); color: var(--color-on-primary-container);">${item.category}</span>` : ''}
-            <span class="text-xs" style="color: var(--color-text-secondary);">${new Date(item.date).toLocaleDateString('zh-CN')}</span>
-          </div>
-          <h3 class="font-semibold mb-1" style="color: var(--color-text);">${item.title}</h3>
-          <p class="text-sm line-clamp-2" style="color: var(--color-text-secondary);">${item.description}</p>
-        </a>
-      `).join('')
-      : '<p class="text-center py-8" style="color: var(--color-text-secondary);">未找到相关文章</p>';
-  });
-</script>

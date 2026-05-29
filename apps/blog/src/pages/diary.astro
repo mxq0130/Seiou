@@ -1,0 +1,28 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const diaries = [
+  { content:'桜の落ちる速さは秒速5センチメートル！🌸', weather:'☀️', location:'东京', date:'2025-03-15' },
+  { content:'今天终于把博客的前端搭建完了，虽然还有很多细节需要打磨，但整体已经可以看了。继续加油！💪', weather:'⛅', location:'家', date:'2025-05-25' },
+  { content:'新番 Lycoris Recoil 真的太好看了！千束和泷奈的互动太甜了 😭', weather:'🌧️', date:'2025-06-10' },
+  { content:'学习 Astro 框架中... 感觉比 Next.js 更适合做内容型站点', weather:'☀️', date:'2025-06-20' },
+];
+---
+
+<Layout title="日记">
+  <div class="max-w-2xl">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-2 gradient-text" style="font-family:var(--font-heading)">📔 日记</h1>
+    <p class="text-[var(--color-text-secondary)] mb-8">随时随地，记录生活 · {diaries.length} 条记录</p>
+    <div class="space-y-6 relative before:absolute before:left-[15px] before:top-4 before:bottom-4 before:w-0.5 before:bg-[var(--color-border)]">
+      {diaries.map(e=>(
+        <div class="flex gap-4 pl-10 relative">
+          <span class="absolute left-0 top-1.5 w-7 h-7 rounded-full bg-[var(--color-primary-light)] flex items-center justify-center text-sm z-10 border-2 border-[var(--color-bg)]">{e.weather}</span>
+          <div class="glass rounded-xl p-4 flex-1 card-accent" style="box-shadow:var(--shadow-card)">
+            <p class="text-sm text-[var(--color-text)] leading-relaxed">{e.content}</p>
+            <div class="flex items-center gap-3 mt-2 text-xs text-[var(--color-text-secondary)]"><time>{e.date}</time>{e.location&&<span>📍 {e.location}</span>}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</Layout>

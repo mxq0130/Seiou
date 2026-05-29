@@ -1,55 +1,40 @@
 ---
-import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
-import PostCard from '../components/PostCard.astro';
 
-const posts = await getCollection('posts', ({ data }) => data.status === 'published');
-const sorted = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-// 按年份分组
-const groupedByYear = new Map<number, typeof posts>();
-for (const post of sorted) {
-  const year = new Date(post.data.date).getFullYear();
-  if (!groupedByYear.has(year)) groupedByYear.set(year, []);
-  groupedByYear.get(year)!.push(post);
-}
-
-// 获取所有分类和标签
-const categories = [...new Set(posts.map((p) => p.data.category).filter(Boolean))] as string[];
-const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+const posts = [
+  { title: 'Markdown 写作完全指南', slug: 'markdown-guide', category: '示例文章', date: '2025-01-20', year: 2025 },
+  { title: '加密文章示例', slug: 'encrypted-post', category: '技术分享', date: '2024-01-15', year: 2024 },
+  { title: 'Markdown 扩展功能展示', slug: 'markdown-extended', category: '示例文章', date: '2024-05-01', year: 2024 },
+  { title: 'Mizuki 主题上手指南', slug: 'mizuki-guide', category: '使用指南', date: '2024-04-01', year: 2024 },
+  { title: 'Mermaid 图表嵌入', slug: 'mermaid-demo', category: '示例文章', date: '2023-10-01', year: 2023 },
+  { title: '嵌入视频文章', slug: 'video-post', category: '示例文章', date: '2022-08-01', year: 2022 },
+];
+const years = [...new Set(posts.map(p => p.year))].sort((a,b) => b-a);
+const categories = [...new Set(posts.map(p => p.category))];
 ---
 
-<Layout title="文章归档" description="所有文章归档">
-  <div class="container-page py-8 sm:py-12">
-    <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text);">文章归档</h1>
-    <p class="mb-8" style="color: var(--color-text-secondary);">
-      共 {posts.length} 篇文章
-    </p>
-
-    <!-- 分类筛选 -->
+<Layout title="归档">
+  <div class="max-w-3xl">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-2 gradient-text" style="font-family: var(--font-heading)">📦 归档</h1>
+    <p class="text-[var(--color-text-secondary)] mb-8">共 {posts.length} 篇文章</p>
     <div class="flex flex-wrap gap-2 mb-8">
-      <a href="/archive" class="text-xs px-3 py-1 rounded-full no-underline font-medium"
-        style="background: var(--color-primary-container); color: var(--color-on-primary-container);">
-        全部
-      </a>
-      {categories.map((cat) => (
-        <a href={`/archive?category=${cat}`} class="text-xs px-3 py-1 rounded-full no-underline"
-          style="background: var(--color-surface-variant); color: var(--color-on-surface-variant);">
-          {cat}
-        </a>
-      ))}
+      <a href="/archive" class="px-3 py-1 rounded-full text-sm bg-[var(--color-primary)] text-white">全部</a>
+      {categories.map(cat => <a href={`/archive?category=${cat}`} class="px-3 py-1 rounded-full text-sm bg-[var(--color-primary-light)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">{cat}</a>)}
     </div>
-
-    <!-- 文章时间轴 -->
-    <div class="space-y-12">
-      {Array.from(groupedByYear.entries()).map(([year, yearPosts]) => (
+    <div class="space-y-8">
+      {years.map(year => (
         <div>
-          <h2 class="text-2xl font-bold mb-6 sticky top-16 z-10 py-2" style="background: var(--color-bg); color: var(--color-primary);">
-            {year}
-          </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {yearPosts.map((post) => (
-              <PostCard post={post} />
+          <h2 class="text-xl font-bold text-[var(--color-primary)] mb-4 sticky top-20 bg-[var(--color-bg)] py-2 z-10" style="font-family: var(--font-heading)">{year}</h2>
+          <div class="space-y-3 relative before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--color-border)]">
+            {posts.filter(p => p.year === year).map(post => (
+              <a href={`/posts/${post.slug}`} class="flex items-start gap-4 group pl-6 relative">
+                <span class="absolute left-0 top-2 w-3.5 h-3.5 rounded-full border-2 border-[var(--color-primary)] bg-[var(--color-bg)] group-hover:bg-[var(--color-primary)] transition-colors z-10"></span>
+                <time class="text-xs text-[var(--color-text-secondary)] shrink-0 w-24 pt-0.5">{new Date(post.date).toLocaleDateString('zh-CN',{month:'short',day:'numeric'})}</time>
+                <div class="min-w-0">
+                  <span class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">{post.title}</span>
+                  <span class="text-xs text-[var(--color-text-secondary)]">{post.category}</span>
+                </div>
+              </a>
             ))}
           </div>
         </div>

@@ -1,113 +1,103 @@
 ---
-import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
-import PostCard from '../../components/PostCard.astro';
+import CommentSection from '../../components/CommentSection.astro';
 
-export async function getStaticPaths() {
-  const posts = await getCollection('posts', ({ data }) => data.status === 'published');
-  return posts.map((post) => ({
-    params: { slug: String(post.id).replace(/\.mdx?$/, '') },
-    props: { post },
-  }));
+const post = {
+  title: 'Markdown 写作完全指南',
+  slug: 'markdown-guide',
+  content: `## 什么是 Markdown？
+Markdown 是一种轻量级标记语言，由 John Gruber 于 2004 年创建。
+
+### 基本语法
+| 元素 | 语法 |
+|------|------|
+| 标题 | # H1 ## H2 ### H3 |
+| 粗体 | **粗体文字** |
+| 斜体 | *斜体文字* |
+| 链接 | [标题](url) |
+| 图片 | ![alt](url) |
+
+### 代码块
+支持多种语言的语法高亮和行号显示。
+
+### 数学公式
+行内公式：$E = mc^2$
+
+块级公式：$$\\int_{a}^{b} f(x) dx = F(b) - F(a)$$
+
+### 提示框
+> [!NOTE] 这是一条温馨提示。
+> [!WARNING] 请注意这条警告信息。
+
+## 总结
+Markdown 让你专注于内容而非排版。`,
+  excerpt: '掌握 Markdown 的所有语法，包括扩展功能如数学公式、Mermaid 图表、代码块增强等。',
+  cover: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&h=600&fit=crop',
+  category: '示例文章',
+  tags: ['Markdown', 'Blogging'],
+  date: '2025-01-20',
+  readingTime: 8,
+  author: { username: 'まつざか ゆき' },
+  prevPost: { title: '加密文章示例', slug: 'encrypted-post' } as any,
+  nextPost: { title: 'Markdown 扩展功能展示', slug: 'markdown-extended' } as any,
+};
+
+const formattedDate = new Date(post.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+
+// 简单 Markdown → HTML 段落的简陋转换（生产环境用 MDX 渲染）
+function renderContent(md: string) {
+  return md.split('\n').map(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return '<br/>';
+    if (trimmed.startsWith('## ')) return `<h2>${trimmed.slice(3)}</h2>`;
+    if (trimmed.startsWith('### ')) return `<h3>${trimmed.slice(4)}</h3>`;
+    if (trimmed.startsWith('> ')) return `<blockquote>${trimmed.slice(2)}</blockquote>`;
+    if (trimmed.startsWith('|')) {
+      const cells = trimmed.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
+      return `<tr>${cells}</tr>`;
+    }
+    if (trimmed.startsWith('- ')) return `<li>${trimmed.slice(2)}</li>`;
+    return `<p>${trimmed}</p>`;
+  }).join('\n');
 }
-
-interface Props {
-  post: CollectionEntry<'posts'>;
-}
-
-const { post } = Astro.props;
-const postSlug = String(post.id).replace(/\.mdx?$/, '');
-const { title, description, category, tags, date, updated } = post.data;
-
-// 渲染 MDX
-const { Content, headings } = await render(post);
-
-const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
-  year: 'numeric', month: 'long', day: 'numeric',
-});
-const formattedUpdated = updated
-  ? new Date(updated).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
-  : null;
-
-// 获取相关文章（同分类或同标签）
-const allPosts = await getCollection('posts', ({ data }) => data.status === 'published');
-const relatedPosts = allPosts
-  .filter((p) => String(p.id).replace(/\.mdx?$/, '') !== postSlug && (p.data.category === category || p.data.tags?.some((t) => tags?.includes(t))))
-  .slice(0, 3);
 ---
 
-<Layout title={title} description={description}>
-  <article class="container-page py-8 sm:py-12">
-    <div class="max-w-3xl mx-auto">
-
-      <!-- 文章头部 -->
-      <header class="mb-8">
-        {/* 分类 + 标签 */}
-        <div class="flex flex-wrap gap-2 mb-4">
-          {category && (
-            <a href={`/archive?category=${category}`} class="text-xs px-3 py-1 rounded-full no-underline font-medium"
-              style="background: var(--color-primary-container); color: var(--color-on-primary-container);">
-              {category}
-            </a>
-          )}
-          {tags?.map((tag) => (
-            <a href={`/archive?tag=${tag}`} class="text-xs px-2 py-1 rounded-full no-underline"
-              style="background: var(--color-surface-variant); color: var(--color-on-surface-variant);">
-              #{tag}
-            </a>
-          ))}
-        </div>
-
-        <h1 class="text-3xl sm:text-4xl font-bold mb-4" style="color: var(--color-text);">
-          {title}
-        </h1>
-
-        {description && (
-          <p class="text-lg mb-4" style="color: var(--color-text-secondary);">
-            {description}
-          </p>
-        )}
-
-        <div class="flex flex-wrap items-center gap-4 text-sm" style="color: var(--color-text-secondary);">
-          <time datetime={date.toISOString()}>发布于 {formattedDate}</time>
-          {formattedUpdated && <span>更新于 {formattedUpdated}</span>}
-          <span>约 {Math.max(1, Math.ceil(post.body?.length / 300))} 分钟阅读</span>
-        </div>
-      </header>
-
-      <div class="flex gap-8 lg:gap-12">
-        {/* 文章正文 */}
-        <div class="flex-1 min-w-0">
-          <div class="prose">
-            <Content />
-          </div>
-
-          {/* 文章底部导航 */}
-          <div class="mt-12 pt-6 border-t" style="border-color: var(--color-border);">
-            <a href="/archive" class="text-sm font-medium no-underline" style="color: var(--color-primary);">
-              ← 返回归档
-            </a>
-          </div>
-        </div>
-
-        {/* 侧边栏：目录 */}
-        <aside class="hidden lg:block w-56 shrink-0">
-          <TableOfContents headings={headings} />
-        </aside>
-      </div>
+<Layout title={post.title} description={post.excerpt} image={post.cover} ogType="article">
+  <article class="max-w-3xl mx-auto">
+    {post.cover && <img src={post.cover} alt={post.title} class="w-full h-64 sm:h-80 object-cover rounded-2xl mb-8" />}
+    <h1 class="text-2xl sm:text-3xl font-bold mb-4" style="font-family: var(--font-heading)">{post.title}</h1>
+    <div class="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-secondary)] mb-8 pb-6 border-b border-[var(--color-border)]">
+      <time datetime={post.date}>{formattedDate}</time>
+      <span>{post.readingTime} 分钟阅读</span>
+      {post.category && <a href={`/archive?category=${post.category}`} class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs">{post.category}</a>}
+      <span class="text-[var(--color-primary)]">{post.author.username}</span>
     </div>
-  </article>
-
-  {/* 相关文章 */}
-  {relatedPosts.length > 0 && (
-    <section class="container-page py-8 sm:py-12">
-      <h2 class="text-2xl font-bold mb-6" style="color: var(--color-text);">相关文章</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {relatedPosts.map((rp) => (
-          <PostCard post={rp} />
-        ))}
+    <div class="flex gap-8">
+      <div class="flex-1 min-w-0 prose max-w-none">
+        <Fragment set:html={renderContent(post.content)} />
       </div>
-    </section>
-  )}
+      <aside class="hidden xl:block w-56 shrink-0">
+        <TableOfContents content={post.content} />
+      </aside>
+    </div>
+    <div class="flex flex-wrap gap-2 mt-10 pt-6 border-t border-[var(--color-border)]">
+      {post.tags.map(tag => <a href={`/search?q=${tag}`} class="px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">#{tag}</a>)}
+    </div>
+    <nav class="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-[var(--color-border)]">
+      {post.prevPost ? (
+        <a href={`/posts/${post.prevPost.slug}`} class="group p-4 rounded-xl glass hover:-translate-y-0.5 transition-all">
+          <span class="text-xs text-[var(--color-text-secondary)]">← 上一篇</span>
+          <p class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors mt-1">{post.prevPost.title}</p>
+        </a>
+      ) : <div />}
+      {post.nextPost ? (
+        <a href={`/posts/${post.nextPost.slug}`} class="group p-4 rounded-xl glass text-right hover:-translate-y-0.5 transition-all">
+          <span class="text-xs text-[var(--color-text-secondary)]">下一篇 →</span>
+          <p class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors mt-1">{post.nextPost.title}</p>
+        </a>
+      ) : <div />}
+    </nav>
+    <div class="mt-12 pt-6 border-t border-[var(--color-border)]"><CommentSection /></div>
+  </article>
 </Layout>

@@ -1,59 +1,46 @@
 ---
 import Layout from '../layouts/Layout.astro';
+
+const skills = [
+  { name:'HTML/CSS', level:90 }, { name:'JavaScript/TypeScript', level:85 }, { name:'React', level:80 },
+  { name:'Node.js', level:75 }, { name:'Astro', level:70 }, { name:'MySQL', level:65 }, { name:'Docker', level:55 }, { name:'Python', level:50 },
+];
 ---
 
-<Layout title="关于" description="关于本站和作者">
-  <div class="container-page py-8 sm:py-12">
-    <div class="max-w-3xl mx-auto">
-      <div class="prose">
-        <h1>关于本站</h1>
-
-        <h2>关于我</h2>
-        <p>你好！我是这个博客的主人，一个热爱二次元和编程的普通人。</p>
-
-        <h3>兴趣爱好</h3>
-        <ul>
-          <li>🎬 看番追番，B 站重度用户</li>
-          <li>💻 全栈开发，喜欢折腾新技术</li>
-          <li>📝 偶尔写写博客，记录所学所想</li>
-          <li>🎮 JRPG 玩家，P5 天下第一</li>
-        </ul>
-
-        <h3>技术栈</h3>
-        <table>
-          <thead>
-            <tr><th>类型</th><th>技术</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>前端</td><td>React, Vue, Astro, Tailwind CSS</td></tr>
-            <tr><td>后端</td><td>Node.js, Express, Python</td></tr>
-            <tr><td>数据库</td><td>MySQL, PostgreSQL, Redis</td></tr>
-            <tr><td>DevOps</td><td>Docker, Nginx, CI/CD</td></tr>
-          </tbody>
-        </table>
-
-        <h2>关于本站</h2>
-        <p>这个博客使用 Astro 构建，部署在雨云香港服务器上。</p>
-        <p>参考了 Mizuki 主题的 Material Design 3 设计风格，融合二次元元素。</p>
-
-        <h3>建站目的</h3>
-        <ol>
-          <li>记录学习过程和经验总结</li>
-          <li>分享技术心得和教程</li>
-          <li>写写生活感悟和追番感想</li>
-          <li>作为个人技术实验田</li>
-        </ol>
-
-        <h2>联系方式</h2>
-        <ul>
-          <li>GitHub: <a href="https://github.com">@username</a></li>
-          <li>Bilibili: <a href="https://space.bilibili.com">@username</a></li>
-          <li>Email: <a href="mailto:hello@example.com">hello@example.com</a></li>
-        </ul>
-
-        <hr />
-        <p>感谢来访！🌸</p>
-      </div>
+<Layout title="关于">
+  <div class="max-w-3xl">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-8 gradient-text" style="font-family:var(--font-heading)">👤 关于</h1>
+    <div class="flex gap-1 mb-8 p-1 glass rounded-xl inline-flex">
+      <span class="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--color-primary)] text-white">关于我</span>
+      <span class="px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-text-secondary)]">技能栈</span>
+      <span class="px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-text-secondary)]">项目</span>
+      <span class="px-4 py-2 rounded-lg text-sm font-medium text-[var(--color-text-secondary)]">时间线</span>
     </div>
+    <section class="glass rounded-xl p-6 mb-6" style="box-shadow:var(--shadow-card)">
+      <div class="flex flex-col sm:flex-row gap-6 items-start">
+        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white text-4xl shrink-0" style="font-family:var(--font-title)">雪</div>
+        <div>
+          <h2 class="text-xl font-bold mb-2" style="font-family:var(--font-heading)">まつざか ゆき</h2>
+          <p class="text-sm text-[var(--color-text-secondary)] mb-4">一个热爱二次元的前端开发者。喜欢摄影、追番、写代码。这个博客记录了我的学习、生活和兴趣。</p>
+          <div class="flex flex-wrap gap-2">
+            <a href="https://github.com" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">🐙 GitHub</a>
+            <a href="https://bilibili.com" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">📺 Bilibili</a>
+            <a href="mailto:example@boke.local" class="px-3 py-1.5 rounded-lg bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">📧 Email</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="glass rounded-xl p-6" style="box-shadow:var(--shadow-card)">
+      <h2 class="text-lg font-bold mb-4" style="font-family:var(--font-heading)">🛠️ 技能栈</h2>
+      <div class="space-y-3">
+        {skills.map(s=>(
+          <div class="flex items-center gap-3">
+            <span class="text-sm text-[var(--color-text)] w-36 shrink-0">{s.name}</span>
+            <div class="flex-1 h-2 bg-[var(--color-primary-light)] rounded-full overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]" style={`width:${s.level}%`}></div></div>
+            <span class="text-xs text-[var(--color-text-secondary)] w-8">{s.level}%</span>
+          </div>
+        ))}
+      </div>
+    </section>
   </div>
 </Layout>

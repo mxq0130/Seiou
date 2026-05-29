@@ -2,47 +2,36 @@
 import Layout from '../layouts/Layout.astro';
 
 const links = [
-  { name: 'Astro 官方文档', url: 'https://docs.astro.build', avatar: '🚀', description: '现代化的静态网站生成器' },
-  { name: 'Tailwind CSS', url: 'https://tailwindcss.com', avatar: '🎨', description: '原子化 CSS 框架' },
-  { name: 'Bilibili', url: 'https://www.bilibili.com', avatar: '📺', description: '二次元弹幕视频网站' },
-  { name: 'Bangumi', url: 'https://bgm.tv', avatar: '📋', description: '番剧数据库' },
-  { name: 'GitHub', url: 'https://github.com', avatar: '💻', description: '全球最大代码托管平台' },
-  { name: 'MDN', url: 'https://developer.mozilla.org', avatar: '📖', description: 'Web 开发文档' },
+  { name: 'Mizuki 主题', url: 'https://mizuki.mysqil.com', description: '一个简约&功能丰富的 Astro 博客主题' },
+  { name: 'GitHub', url: 'https://github.com', description: '全球最大的代码托管平台' },
+  { name: 'Bilibili', url: 'https://bilibili.com', description: '国内最大的二次元视频社区' },
+  { name: 'Astro 官网', url: 'https://astro.build', description: '现代静态站点生成器' },
+  { name: 'Tailwind CSS', url: 'https://tailwindcss.com', description: '原子化 CSS 框架' },
+  { name: 'Vercel', url: 'https://vercel.com', description: '前端部署平台' },
 ];
 ---
 
-<Layout title="友链" description="友情链接">
-  <div class="container-page py-8 sm:py-12">
-    <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text);">🔗 友链</h1>
-    <p class="mb-8" style="color: var(--color-text-secondary);">
-      一些值得推荐的站点
-    </p>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {links.map((link) => (
-        <a href={link.url} target="_blank" rel="noopener noreferrer" class="card p-5 no-underline flex items-start gap-4 group">
-          <span class="text-3xl shrink-0">{link.avatar}</span>
-          <div class="min-w-0">
-            <h3 class="font-semibold text-base truncate group-hover:underline" style="color: var(--color-text);">
-              {link.name}
-            </h3>
-            <p class="text-sm mt-1 line-clamp-2" style="color: var(--color-text-secondary);">
-              {link.description}
-            </p>
+<Layout title="友链">
+  <div class="max-w-4xl">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-2 gradient-text" style="font-family: var(--font-heading)">🔗 友链</h1>
+    <p class="text-[var(--color-text-secondary)] mb-8">一些有趣的朋友和有用的资源</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+      {links.map(link => (
+        <a href={link.url} target="_blank" rel="noopener" class="glass rounded-xl p-5 card-accent transition-all duration-300 hover:-translate-y-1 group" style="box-shadow: var(--shadow-card)">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white text-xl font-bold shrink-0" style="font-family:var(--font-title)">{link.name[0]}</div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-sm font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors truncate">{link.name}</h3>
+              <p class="text-xs text-[var(--color-text-secondary)] line-clamp-1 mt-0.5">{link.description}</p>
+            </div>
           </div>
         </a>
       ))}
     </div>
-
-    <!-- 申请友链 -->
-    <div class="mt-12 p-8 text-center card">
-      <h3 class="text-xl font-bold mb-3" style="color: var(--color-text);">💌 申请友链</h3>
-      <p class="mb-4" style="color: var(--color-text-secondary);">
-        想交换友链？在评论区留言你的站点信息，审核通过后我会添加。
-      </p>
-      <p class="text-sm" style="color: var(--color-text-secondary);">
-        需要提供：站点名称、链接、头像、描述
-      </p>
+    <div class="glass rounded-xl p-6 text-center">
+      <h3 class="text-lg font-semibold mb-2" style="font-family: var(--font-heading)">💌 申请友链</h3>
+      <p class="text-sm text-[var(--color-text-secondary)] mb-4">想交换友链？请发送邮件至 example@boke.local</p>
+      <a href="mailto:example@boke.local" class="inline-flex px-5 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90 transition-opacity">发送邮件</a>
     </div>
   </div>
 </Layout>

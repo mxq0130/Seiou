@@ -1,59 +1,43 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-
-interface Props {
-  post: CollectionEntry<'posts'>;
+export interface Props {
+  title: string;
+  slug: string;
+  excerpt?: string;
+  cover?: string;
+  category?: string;
+  tags?: string[];
+  date: string;
+  readingTime?: number;
+  pinned?: boolean;
 }
 
-const { post } = Astro.props;
-const { title, description, cover, category, tags, date } = post.data;
-const slug = String(post.id).replace(/\.mdx?$/, '');
-const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
-  year: 'numeric', month: 'long', day: 'numeric'
-});
-
-// 估算阅读时间
-const wordCount = post.body?.length || 0;
-const readingTime = Math.max(1, Math.ceil(wordCount / 300));
+const { title, slug, excerpt, cover, category, tags = [], date, readingTime, pinned } = Astro.props;
+const formattedDate = new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 
-<article class="card overflow-hidden group h-full flex flex-col">
-  <!-- 封面图 -->
-  <a href={`/posts/${slug}`} class="h-44 overflow-hidden">
-    <div class="h-full w-full flex items-center justify-center text-4xl transition-transform duration-300 group-hover:scale-105"
-      style="background: linear-gradient(135deg, var(--color-primary-container), var(--color-sakura));">
-      {cover ? <img src={cover} alt={title} class="h-full w-full object-cover" /> : '📝'}
+<article class="group">
+  <a href={`/posts/${slug}`} class="block glass rounded-xl overflow-hidden card-accent transition-all duration-300 hover:-translate-y-1"
+     style="box-shadow: var(--shadow-card)"
+     onmouseenter="this.style.boxShadow='var(--shadow-card-hover)'" onmouseleave="this.style.boxShadow='var(--shadow-card)'">
+    <div class="flex flex-col sm:flex-row">
+      {cover && (
+        <div class="sm:w-48 shrink-0 overflow-hidden">
+          <img src={cover} alt={title} class="w-full h-40 sm:h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+        </div>
+      )}
+      <div class="flex-1 p-5 flex flex-col justify-between min-w-0">
+        <div>
+          {pinned && <span class="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] mb-2">📌 置顶</span>}
+          <h2 class="text-lg font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-2 mb-2" style="font-family: var(--font-heading)">{title}</h2>
+          {excerpt && <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3">{excerpt}</p>}
+        </div>
+        <div class="flex flex-wrap items-center gap-3 text-xs text-[var(--color-text-secondary)]">
+          <time datetime={date} class="flex items-center gap-1">📅 {formattedDate}</time>
+          {readingTime && <span class="flex items-center gap-1">⏱ {readingTime} 分钟</span>}
+          {category && <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)]">{category}</span>}
+          {tags.slice(0, 3).map(tag => <span class="text-[var(--color-accent-blue)]">#{tag}</span>)}
+        </div>
+      </div>
     </div>
   </a>
-
-  <div class="p-5 flex flex-col flex-1">
-    <!-- 分类标签 -->
-    <div class="flex gap-2 mb-2">
-      {category && (
-        <span class="text-xs px-2 py-1 rounded-full" style="background: var(--color-primary-container); color: var(--color-on-primary-container);">
-          {category}
-        </span>
-      )}
-    </div>
-
-    <!-- 标题 -->
-    <a href={`/posts/${slug}`} class="no-underline mb-2">
-      <h3 class="text-lg font-semibold line-clamp-2 group-hover:underline" style="color: var(--color-text);">
-        {title}
-      </h3>
-    </a>
-
-    <!-- 摘要 -->
-    {description && (
-      <p class="text-sm line-clamp-2 mb-3 flex-1" style="color: var(--color-text-secondary);">
-        {description}
-      </p>
-    )}
-
-    <!-- 元信息 -->
-    <div class="flex items-center justify-between text-xs mt-auto" style="color: var(--color-text-secondary);">
-      <time datetime={date.toISOString()}>{formattedDate}</time>
-      <span>{readingTime} 分钟阅读</span>
-    </div>
-  </div>
 </article>

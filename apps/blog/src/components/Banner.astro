@@ -1,0 +1,43 @@
+---
+const slides = [
+  { image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=600&fit=crop', gradient: 'linear-gradient(135deg,rgba(232,115,138,0.5),rgba(107,125,179,0.6))' },
+  { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=600&fit=crop', gradient: 'linear-gradient(135deg,rgba(107,125,179,0.5),rgba(126,200,227,0.6))' },
+  { image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=600&fit=crop', gradient: 'linear-gradient(135deg,rgba(126,200,227,0.5),rgba(232,115,138,0.6))' },
+];
+---
+
+<div class="relative overflow-hidden rounded-2xl mb-10" style="height: 360px;">
+  <div id="banner-slides" class="relative w-full h-full">
+    {slides.map((s, i) => (
+      <div class="banner-slide absolute inset-0 transition-opacity duration-700" style={`opacity: ${i === 0 ? '1' : '0'}`} data-index={i}>
+        <img src={s.image} alt="" class="w-full h-full object-cover" loading={i === 0 ? 'eager' : 'lazy'} />
+        <div class="absolute inset-0" style={`background: ${s.gradient}`}></div>
+      </div>
+    ))}
+  </div>
+  <div class="absolute inset-0 flex flex-col items-center justify-center text-white z-10">
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 drop-shadow-lg" style="font-family: var(--font-title)">わたしの部屋</h1>
+    <p class="text-lg sm:text-xl opacity-90 drop-shadow-md">まつざか ゆき</p>
+    <p class="mt-2 text-sm sm:text-base opacity-75 max-w-md text-center drop-shadow">记录生活 · 分享技术 · 追番日常</p>
+  </div>
+  <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+    {slides.map((_, i) => (
+      <button class="banner-dot w-2.5 h-2.5 rounded-full transition-all" style={`background: ${i === 0 ? 'white' : 'rgba(255,255,255,0.5)'}; width: ${i === 0 ? '24px' : '10px'}`} data-index={i} aria-label={`第 ${i+1} 张`}></button>
+    ))}
+  </div>
+</div>
+
+<script is:inline>
+  (function() {
+    const slides = document.querySelectorAll('.banner-slide');
+    const dots = document.querySelectorAll('.banner-dot');
+    if (slides.length < 2) return;
+    let current = 0;
+    function show(i) {
+      slides.forEach((s, j) => { (s as HTMLElement).style.opacity = j === i ? '1' : '0'; });
+      dots.forEach((d, j) => { (d as HTMLElement).style.background = j === i ? 'white' : 'rgba(255,255,255,0.5)'; (d as HTMLElement).style.width = j === i ? '24px' : '10px'; });
+    }
+    setInterval(() => { current = (current + 1) % slides.length; show(current); }, 5000);
+    dots.forEach(d => d.addEventListener('click', () => { current = parseInt(d.getAttribute('data-index') || '0'); show(current); }));
+  })();
+</script>

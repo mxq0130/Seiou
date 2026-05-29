@@ -1,75 +1,24 @@
 ---
-interface Heading {
-  depth: number;
-  slug: string;
-  text: string;
-}
+export interface Props { content: string; }
+const { content } = Astro.props;
 
-interface Props {
-  headings: Heading[];
-  title?: string;
+const headings: { level: number; text: string; id: string }[] = [];
+for (const line of content.split('\n')) {
+  const h2 = line.match(/^## (.+)/);
+  const h3 = line.match(/^### (.+)/);
+  if (h2) { const t = h2[1].trim(); headings.push({ level: 2, text: t, id: t.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '') }); }
+  else if (h3) { const t = h3[1].trim(); headings.push({ level: 3, text: t, id: t.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '') }); }
 }
-
-const { headings, title = '目录' } = Astro.props;
-const items = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 ---
 
-{items.length > 0 && (
-  <nav class="toc">
-    <h4 class="toc-title">{title}</h4>
-    <ul class="toc-list">
-      {items.map((h) => (
-        <li class={`toc-item toc-depth-${h.depth}`}>
-          <a href={`#${h.slug}`}>{h.text}</a>
-        </li>
-      ))}
-    </ul>
+<div class="sticky top-24">
+  <h4 class="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-4">📑 目录</h4>
+  <nav class="space-y-1 text-sm max-h-[60vh] overflow-y-auto">
+    {headings.map(h => (
+      <a href={`#${h.id}`} class={`block py-1.5 transition-colors hover:text-[var(--color-primary)] ${h.level === 3 ? 'pl-4 text-[var(--color-text-secondary)]' : 'text-[var(--color-text)] font-medium'}`}>
+        {h.text}
+      </a>
+    ))}
   </nav>
-)}
-
-<style>
-  .toc {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 1rem 1.25rem;
-    position: sticky;
-    top: calc(var(--navbar-height) + 1.5rem);
-    max-height: calc(100vh - var(--navbar-height) - 3rem);
-    overflow-y: auto;
-  }
-  .toc-title {
-    font-size: 0.875rem;
-    font-weight: 700;
-    margin: 0 0 0.75rem;
-    color: var(--color-text);
-  }
-  .toc-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .toc-item a {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    padding: 3px 0;
-    transition: color 0.15s ease;
-    border-left: 2px solid transparent;
-    padding-left: 0;
-  }
-  .toc-item a:hover {
-    color: var(--color-primary);
-  }
-  .toc-depth-2 a {
-    font-weight: 500;
-  }
-  .toc-depth-3 a {
-    padding-left: 1rem;
-    font-size: 0.8rem;
-  }
-</style>
+</div>
+<style>nav::-webkit-scrollbar{width:4px}</style>
