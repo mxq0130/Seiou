@@ -1,12 +1,26 @@
-<section class="hero-root">
-  <!-- 背景图 + 深色遮罩 -->
-  <div class="hero-bg">
-    <img
-      src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1920&h=1080&fit=crop"
-      alt=""
-      class="hero-img"
-      fetchpriority="high"
-    />
+---
+// Hero 轮播背景 — 可后台配置图片列表
+const slides = [
+  'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1920&h=1080&fit=crop',
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&h=1080&fit=crop',
+  'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1920&h=1080&fit=crop',
+];
+---
+
+<section class="hero-root" id="hero-root">
+  <!-- 轮播背景图层 -->
+  <div class="hero-bg" id="hero-bg">
+    {slides.map((src, i) => (
+      <img
+        src={src}
+        alt=""
+        class={`hero-slide ${i === 0 ? 'active' : ''}`}
+        data-index={i}
+        fetchpriority={i === 0 ? 'high' : 'auto'}
+        loading={i === 0 ? 'eager' : 'lazy'}
+      />
+    ))}
     <div class="hero-overlay"></div>
   </div>
 
@@ -36,6 +50,17 @@
     </div>
   </div>
 
+  <!-- 轮播指示器 -->
+  <div class="hero-dots" id="hero-dots">
+    {slides.map((_, i) => (
+      <button
+        class={`hero-dot ${i === 0 ? 'active' : ''}`}
+        data-index={i}
+        aria-label={`第 ${i + 1} 张`}
+      ></button>
+    ))}
+  </div>
+
   <!-- 底部滚动线 -->
   <div class="scroll-hint" aria-hidden="true">
     <div class="scroll-line"></div>
@@ -53,79 +78,81 @@
     margin-right: calc(-50vw + 50%);
   }
 
-  /* 背景 */
-  .hero-bg {
+  .hero-bg { position: absolute; inset: 0; }
+
+  .hero-slide {
     position: absolute;
     inset: 0;
-  }
-  .hero-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    opacity: 0;
     transform: scale(1.05);
-    animation: heroDrift 20s ease-in-out infinite alternate;
+    transition: opacity 1.2s ease-in-out, transform 1.5s ease-in-out;
   }
-  @keyframes heroDrift {
-    0% { transform: scale(1.05) translate(0, 0); }
-    100% { transform: scale(1.08) translate(-1%, -0.5%); }
+  .hero-slide.active {
+    opacity: 1;
+    transform: scale(1);
   }
 
   .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(30, 20, 40, 0.75) 0%,
-      rgba(30, 20, 40, 0.45) 50%,
-      rgba(20, 15, 35, 0.7) 100%
-    );
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg,
+      rgba(30,20,40,0.72) 0%,
+      rgba(30,20,40,0.40) 50%,
+      rgba(20,15,35,0.68) 100%);
+    z-index: 1;
   }
 
-  /* 几何光效 */
-  .hero-lights { position: absolute; inset: 0; overflow: hidden; }
+  .hero-lights { position: absolute; inset: 0; overflow: hidden; z-index: 1; }
   .light {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.12;
+    position: absolute; border-radius: 50%;
+    filter: blur(100px); opacity: 0.10;
     animation: lightPulse 8s ease-in-out infinite alternate;
   }
-  .light-1 {
-    width: 600px; height: 600px;
-    top: -200px; right: -100px;
-    background: #E8738A;
-    animation-delay: 0s;
-  }
-  .light-2 {
-    width: 450px; height: 450px;
-    bottom: -100px; left: -50px;
-    background: #6B7DB3;
-    animation-delay: 3s;
-  }
-  .light-3 {
-    width: 300px; height: 300px;
-    top: 40%; left: 50%;
-    background: #7EC8E3;
-    animation-delay: 6s;
-  }
+  .light-1 { width:600px; height:600px; top:-200px; right:-100px; background:#E8738A; }
+  .light-2 { width:450px; height:450px; bottom:-100px; left:-50px; background:#6B7DB3; animation-delay:3s; }
+  .light-3 { width:300px; height:300px; top:40%; left:50%; background:#7EC8E3; animation-delay:6s; }
   @keyframes lightPulse {
-    0% { opacity: 0.06; transform: scale(1); }
-    100% { opacity: 0.16; transform: scale(1.15); }
+    0% { opacity:0.06; transform:scale(1); }
+    100% { opacity:0.14; transform:scale(1.15); }
   }
 
-  /* 内容 */
+  /* 轮播指示器 */
+  .hero-dots {
+    position: absolute;
+    bottom: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.6rem;
+    z-index: 3;
+  }
+  .hero-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .hero-dot.active {
+    background: #fff;
+    width: 24px;
+    border-radius: 4px;
+  }
+  .hero-dot:hover { background: rgba(255,255,255,0.7); }
+
   .hero-content {
     position: absolute;
-    bottom: 18%;
-    left: 0;
-    right: 0;
+    bottom: 14%;
+    left: 0; right: 0;
     padding: 0 clamp(1.5rem, 8vw, 8rem);
     z-index: 2;
   }
 
   .hero-eyebrow {
-    font-size: 0.75rem;
-    letter-spacing: 0.25em;
+    font-size: 0.75rem; letter-spacing: 0.25em;
     text-transform: uppercase;
     color: rgba(255,255,255,0.5);
     margin-bottom: 1.5rem;
@@ -134,18 +161,14 @@
   }
 
   .hero-title {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15em;
-    margin-bottom: 1.5rem;
+    display: flex; flex-direction: column;
+    gap: 0.15em; margin-bottom: 1.5rem;
   }
 
   .title-line {
     font-size: clamp(3rem, 8vw, 6.5rem);
-    font-weight: 800;
-    line-height: 1.05;
-    color: #fff;
-    letter-spacing: -0.02em;
+    font-weight: 800; line-height: 1.05;
+    color: #fff; letter-spacing: -0.02em;
   }
   .title-line.accent {
     background: linear-gradient(135deg, #F0A0B5 0%, #9DAFDE 100%);
@@ -157,47 +180,32 @@
   .hero-desc {
     font-size: clamp(0.95rem, 1.8vw, 1.2rem);
     color: rgba(255,255,255,0.55);
-    max-width: 520px;
-    line-height: 1.7;
+    max-width: 520px; line-height: 1.7;
     margin-bottom: 2.5rem;
   }
 
-  /* 按钮 */
-  .hero-actions {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
 
   .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.85rem 2rem;
-    border-radius: 9999px;
-    background: rgba(255,255,255,0.95);
-    color: #1a1a2e;
-    font-weight: 600;
-    font-size: 0.95rem;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.85rem 2rem; border-radius: 9999px;
+    background: rgba(255,255,255,0.95); color: #1a1a2e;
+    font-weight: 600; font-size: 0.95rem;
     text-decoration: none;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
   }
   .btn-primary:hover {
-    background: #fff;
-    transform: translateY(-2px);
+    background: #fff; transform: translateY(-2px);
     box-shadow: 0 12px 40px rgba(0,0,0,0.3);
   }
 
   .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.85rem 2rem;
-    border-radius: 9999px;
+    display: inline-flex; align-items: center;
+    padding: 0.85rem 2rem; border-radius: 9999px;
     border: 1.5px solid rgba(255,255,255,0.3);
     color: rgba(255,255,255,0.85);
-    font-weight: 500;
-    font-size: 0.95rem;
+    font-weight: 500; font-size: 0.95rem;
     text-decoration: none;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
@@ -208,22 +216,56 @@
     transform: translateY(-2px);
   }
 
-  /* 滚动提示 */
   .scroll-hint {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
+    position: absolute; bottom: 1.5rem;
+    left: 50%; transform: translateX(-50%); z-index: 2;
   }
   .scroll-line {
-    width: 1px;
-    height: 40px;
+    width: 1px; height: 36px;
     background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
     animation: scrollLine 2s ease-in-out infinite;
   }
   @keyframes scrollLine {
-    0%, 100% { transform: scaleY(0.4); opacity: 0.3; }
-    50% { transform: scaleY(1); opacity: 1; }
+    0%,100% { transform:scaleY(0.4); opacity:0.3; }
+    50% { transform:scaleY(1); opacity:1; }
   }
 </style>
+
+<script is:inline>
+  (function() {
+    var slides = document.querySelectorAll('.hero-slide');
+    var dots = document.querySelectorAll('.hero-dot');
+    if (slides.length < 2) return;
+
+    var current = 0;
+    var timer;
+
+    function show(i) {
+      slides.forEach(function(s) { s.classList.remove('active'); });
+      dots.forEach(function(d) { d.classList.remove('active'); });
+      slides[i].classList.add('active');
+      dots[i].classList.add('active');
+    }
+
+    function next() {
+      current = (current + 1) % slides.length;
+      show(current);
+    }
+
+    function startAuto() {
+      stopAuto();
+      timer = setInterval(next, 5000);
+    }
+    function stopAuto() { clearInterval(timer); }
+
+    dots.forEach(function(d) {
+      d.addEventListener('click', function() {
+        current = parseInt(this.getAttribute('data-index') || '0');
+        show(current);
+        startAuto();
+      });
+    });
+
+    startAuto();
+  })();
+</script>

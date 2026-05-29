@@ -2,7 +2,6 @@
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import Carousel from '../components/Carousel.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 
 const allPosts = await getCollection('posts', ({ data }) => !data.draft);
@@ -28,9 +27,6 @@ const stats = [
 
 <Layout title="首页" noSidebar>
   <Hero />
-
-  <!-- 轮播图 -->
-  <Carousel />
 
   <!-- 功能介绍卡片 -->
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
