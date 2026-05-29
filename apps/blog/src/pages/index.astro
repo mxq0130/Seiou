@@ -4,20 +4,14 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 
-// 从内容集合获取文章
 const allPosts = await getCollection('posts', ({ data }) => !data.draft);
-const posts = allPosts
-  .sort((a, b) => b.data.published.getTime() - a.data.published.getTime())
-  .slice(0, 6);
+const categories = [...new Set(allPosts.map(p => p.data.category))];
+const tagSet = new Set(allPosts.flatMap(p => p.data.tags));
 
-// 分类去重
-const categories = [...new Set(posts.map(p => p.data.category))];
-
-// 统计
 const stats = [
   { value: allPosts.length, label: '文章', icon: '📝' },
   { value: categories.length, label: '分类', icon: '📂' },
-  { value: [...new Set(posts.flatMap(p => p.data.tags))].length, label: '标签', icon: '🏷️' },
+  { value: tagSet.size, label: '标签', icon: '🏷️' },
   { value: '365+', label: '运行天数', icon: '⏱' },
 ];
 
@@ -30,76 +24,10 @@ const quickLinks = [
 ---
 
 <Layout title="首页" noSidebar>
-  <!-- ===== Hero 全屏 ===== -->
   <Hero />
 
-  <!-- ===== 瀑布流文章 ===== -->
-  <section id="posts" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
-    <ScrollReveal>
-      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4 tracking-tight">
-        <span class="gradient-text">最新文章</span>
-      </h2>
-      <p class="text-[var(--color-text-secondary)] text-lg mb-10 max-w-xl">
-        探索更多有趣的内容。从技术教程到生活随笔，这里都有。
-      </p>
-    </ScrollReveal>
-
-    <!-- 分类筛选 -->
-    <div class="flex flex-wrap gap-2 mb-10">
-      <button class="filter-btn active px-4 py-1.5 rounded-full text-sm font-medium bg-[var(--color-text)] text-[var(--color-bg)] transition-all" data-cat="all">全部</button>
-      {categories.map(cat => (
-        <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text)] hover:text-[var(--color-text)] transition-all" data-cat={cat}>{cat}</button>
-      ))}
-    </div>
-
-    <!-- 瀑布流 -->
-    <div class="masonry">
-      {posts.map((post, i) => (
-        <div class="masonry-item" data-category={post.data.category}>
-          <ScrollReveal type="fade-up" delay={i * 80}>
-            <a href={`/posts/${post.data.slug}`} class="block group">
-              <article class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] transition-all duration-400 hover:-translate-y-1 hover:border-[var(--color-primary)]/30 hover:shadow-2xl hover:shadow-[var(--color-primary)]/5">
-                {post.data.image && (
-                  <div class="overflow-hidden">
-                    <img
-                      src={post.data.image}
-                      alt={post.data.title}
-                      class="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-                <div class="p-5 sm:p-6">
-                  {post.data.pinned && (
-                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] mb-2 tracking-wide uppercase">
-                      <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span> 置顶
-                    </span>
-                  )}
-                  <h3 class="text-lg font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-3 mb-2 leading-snug tracking-tight">
-                    {post.data.title}
-                  </h3>
-                  <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3 leading-relaxed">
-                    {post.data.description}
-                  </p>
-                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-secondary)]">
-                    <time datetime={post.data.published.toISOString()}>
-                      {post.data.published.toLocaleDateString('zh-CN', { year:'numeric', month:'short', day:'numeric' })}
-                    </time>
-                    <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs font-medium">
-                      {post.data.category}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            </a>
-          </ScrollReveal>
-        </div>
-      ))}
-    </div>
-  </section>
-
-  <!-- ===== 统计数字 ===== -->
-  <section class="py-20 border-t border-[var(--color-border)]">
+  <!-- 统计数字 -->
+  <section class="py-24">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <ScrollReveal>
         <h2 class="text-2xl sm:text-3xl font-bold text-center mb-12 tracking-tight">站点数据</h2>
@@ -118,7 +46,7 @@ const quickLinks = [
     </div>
   </section>
 
-  <!-- ===== 快捷入口 ===== -->
+  <!-- 快捷入口 -->
   <section class="py-20 border-t border-[var(--color-border)]">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <ScrollReveal>
@@ -139,44 +67,12 @@ const quickLinks = [
   </section>
 </Layout>
 
-<style>
-  .masonry {
-    column-count: 3;
-    column-gap: 1.5rem;
-  }
-  @media (max-width: 1024px) { .masonry { column-count: 2; } }
-  @media (max-width: 640px)  { .masonry { column-count: 1; } }
-  .masonry-item {
-    break-inside: avoid;
-    margin-bottom: 1.5rem;
-  }
-  .filter-btn.active {
-    background: var(--color-text) !important;
-    color: var(--color-bg) !important;
-    border-color: transparent !important;
-  }
-</style>
-
 <script is:inline>
-  // 瀑布流分类筛选
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const cat = (btn as HTMLElement).dataset.cat;
-      document.querySelectorAll('.masonry-item').forEach((item: HTMLElement) => {
-        item.style.display = (cat === 'all' || item.dataset.category === cat) ? '' : 'none';
-      });
-    });
-  });
-
-  // 统计数字动画
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const el = entry.target as HTMLElement;
         const raw = el.dataset.target || '0';
-        // 处理 "365+" 这种字符串
         const suffix = raw.includes('+') ? '+' : '';
         const target = parseInt(raw.replace('+', ''));
         const duration = 1800;
