@@ -13,12 +13,21 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      proxy: {
+        '/admin': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/admin/, ''),
+        },
+      },
+    },
   },
 
   integrations: [mdx(), sitemap()],
 
   markdown: {
-    syntaxHighlight: false, // 关闭默认高亮，使用 Expressive Code
+    syntaxHighlight: false,
   },
 
   server: { port: 4321 },
