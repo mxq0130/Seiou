@@ -34,6 +34,13 @@ let siteSettings = {
     { title: '打上花火', artist: 'DAOKO × 米津玄師' },
     { title: 'アイドル', artist: 'YOASOBI' },
   ],
+  /** 首页轮播图 */
+  carouselSlides: [
+    { image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=500&fit=crop', title: '星空下的约定', subtitle: '原创科幻恋爱番 · 火星殖民地', link: '/anime' },
+    { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=500&fit=crop', title: '魔法少女的秘密', subtitle: 'C2C 出品 · 治愈系日常', link: '/anime' },
+    { image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=500&fit=crop', title: '剑与魔法的时代', subtitle: '异世界的文艺复兴', link: '/posts/anime-2025' },
+    { image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&h=500&fit=crop', title: 'Lycoris Recoil', subtitle: '千束和泷奈 · A-1 Pictures', link: '/anime' },
+  ],
   /** 侧边栏 Widget 可见性 */
   sidebarWidgets: {
     stats: true,

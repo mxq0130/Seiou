@@ -140,6 +140,48 @@ export default function SettingsPage() {
           <Form.Item label="首页公告" name="announcement">
             <Input.TextArea rows={2} />
           </Form.Item>
+          <Divider plain>首页轮播图</Divider>
+          <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>
+            每行一个图片URL，支持格式：图片URL | 标题 | 副标题 | 链接
+          </p>
+          <Form.Item label="轮播图配置">
+            <Form.List name="carouselSlides">
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...rest }) => (
+                    <Row key={key} gutter={8} style={{ marginBottom: 8 }}>
+                      <Col span={8}>
+                        <Form.Item {...rest} name={[name, 'image']} noStyle>
+                          <Input placeholder="图片URL" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={5}>
+                        <Form.Item {...rest} name={[name, 'title']} noStyle>
+                          <Input placeholder="标题" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={5}>
+                        <Form.Item {...rest} name={[name, 'subtitle']} noStyle>
+                          <Input placeholder="副标题" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={4}>
+                        <Form.Item {...rest} name={[name, 'link']} noStyle>
+                          <Input placeholder="链接" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={2}>
+                        <Button danger size="small" onClick={() => remove(name)}>删</Button>
+                      </Col>
+                    </Row>
+                  ))}
+                  <Button type="dashed" onClick={() => add({ image: '', title: '', subtitle: '', link: '' })} block>
+                    + 添加轮播图
+                  </Button>
+                </>
+              )}
+            </Form.List>
+          </Form.Item>
           <Divider plain>首页区块开关</Divider>
           <Space size="large" wrap>
             <Form.Item label="Hero大屏" name={['homepageSections', 'hero']} valuePropName="checked">
