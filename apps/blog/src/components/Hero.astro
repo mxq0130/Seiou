@@ -1,0 +1,196 @@
+---
+// Hero 组件 — 全屏渐变背景 + 樱花粒子 + 打字机 + 滚动指示器
+const subtitle = '记录生活 · 分享技术 · 追番日常';
+---
+
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden" id="hero">
+  <!-- 动画渐变背景层 -->
+  <div class="absolute inset-0 hero-bg"></div>
+
+  <!-- 樱花粒子（纯 CSS，24个） -->
+  <div class="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+    {Array.from({ length: 24 }).map((_, i) => {
+      const left = Math.random() * 100;
+      const delay = Math.random() * 15;
+      const duration = 8 + Math.random() * 12;
+      const size = 6 + Math.random() * 14;
+      const drift = -30 + Math.random() * 60;
+      return (
+        <div
+          class="petal"
+          style={{
+            left: `${left}%`,
+            animationDelay: `${delay}s`,
+            animationDuration: `${duration}s`,
+            width: `${size}px`,
+            height: `${size * 1.2}px`,
+            '--drift': `${drift}px`,
+          }}
+        ></div>
+      );
+    })}
+  </div>
+
+  <!-- 光晕装饰 -->
+  <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20" style="background: var(--color-primary)"></div>
+  <div class="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-15" style="background: var(--color-secondary)"></div>
+
+  <!-- 内容区 -->
+  <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+    <!-- 站点标题 -->
+    <h1
+      class="text-5xl sm:text-6xl lg:text-8xl font-bold mb-6 hero-title"
+      style="font-family: var(--font-title); text-shadow: 0 0 80px rgba(232,115,138,0.3);"
+    >
+      <span class="gradient-text">わたしの部屋</span>
+    </h1>
+
+    <!-- 副标题（打字机效果） -->
+    <p class="text-lg sm:text-xl lg:text-2xl text-[var(--color-text-secondary)] mb-10 typing-text min-h-[2em]">
+      <span id="typing-target"></span>
+      <span class="typing-cursor">|</span>
+    </p>
+
+    <!-- CTA 按钮 -->
+    <div class="flex flex-wrap items-center justify-center gap-4">
+      <a href="#posts"
+         class="px-8 py-3 rounded-full text-white font-medium text-lg
+                bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]
+                hover:shadow-lg hover:shadow-[var(--color-primary)]/30
+                transition-all duration-300 hover:-translate-y-0.5">
+        📖 探索文章
+      </a>
+      <a href="/about"
+         class="px-8 py-3 rounded-full font-medium text-lg
+                border-2 border-[var(--color-primary)] text-[var(--color-primary)]
+                hover:bg-[var(--color-primary)] hover:text-white
+                transition-all duration-300 hover:-translate-y-0.5 glass">
+        👤 关于我
+      </a>
+    </div>
+  </div>
+
+  <!-- 向下滚动指示器 -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 scroll-indicator">
+    <div class="w-6 h-10 rounded-full border-2 border-[var(--color-text-secondary)]/40 flex justify-center">
+      <div class="w-1.5 h-3 rounded-full bg-[var(--color-primary)] mt-2 scroll-dot"></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* 动画渐变背景 */
+  .hero-bg {
+    background: linear-gradient(135deg,
+      var(--color-bg) 0%,
+      var(--color-primary-light) 30%,
+      var(--color-bg) 50%,
+      rgba(107,125,179,0.15) 70%,
+      var(--color-bg) 100%
+    );
+    background-size: 400% 400%;
+    animation: bgShift 15s ease infinite;
+  }
+
+  @keyframes bgShift {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 100% 0%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+  }
+
+  /* 标题呼吸发光 */
+  .hero-title {
+    animation: titleGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes titleGlow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(232,115,138,0.2)); }
+    50% { filter: drop-shadow(0 0 40px rgba(232,115,138,0.4)); }
+  }
+
+  /* 打字机光标 */
+  .typing-cursor {
+    animation: blink 0.8s step-end infinite;
+    color: var(--color-primary);
+    font-weight: 100;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* 樱花粒子 */
+  .petal {
+    position: absolute;
+    top: -20px;
+    background: linear-gradient(180deg, rgba(255,183,197,0.8), rgba(255,183,197,0.2));
+    border-radius: 50% 0 50% 0;
+    animation: fall linear infinite;
+    opacity: 0;
+  }
+
+  @keyframes fall {
+    0% {
+      transform: translateY(-10px) translateX(0) rotate(0deg);
+      opacity: 0;
+    }
+    5% {
+      opacity: 0.7;
+    }
+    90% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(100vh) translateX(var(--drift, 30px)) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  /* 滚动指示器 */
+  .scroll-dot {
+    animation: scrollBounce 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollBounce {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(8px); opacity: 0.3; }
+  }
+
+  /* 深色模式适配 */
+  :root.dark .petal {
+    background: linear-gradient(180deg, rgba(240,160,181,0.6), rgba(240,160,181,0.1));
+  }
+
+  :root.dark .hero-bg {
+    background: linear-gradient(135deg,
+      var(--color-bg) 0%,
+      rgba(240,160,181,0.1) 30%,
+      var(--color-bg) 50%,
+      rgba(157,175,222,0.1) 70%,
+      var(--color-bg) 100%
+    );
+    background-size: 400% 400%;
+  }
+</style>
+
+<script is:inline>
+  // 打字机效果
+  (function() {
+    const target = document.getElementById('typing-target');
+    if (!target) return;
+    const text = '记录生活 · 分享技术 · 追番日常';
+    let i = 0;
+    function type() {
+      if (i <= text.length) {
+        target.textContent = text.slice(0, i);
+        i++;
+        setTimeout(type, 80 + Math.random() * 60);
+      } else {
+        // 完成后等待，然后删除重新开始
+        setTimeout(() => { i = 0; type(); }, 4000);
+      }
+    }
+    setTimeout(type, 500);
+  })();
+</script>

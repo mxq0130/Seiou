@@ -1,29 +1,202 @@
-import { Card, Form, Input, Button, message } from 'antd';
+import { useEffect, useState } from 'react';
+import {
+  Card, Form, Input, Button, message, Switch, Divider, Space, Row, Col, Spin,
+} from 'antd';
+import { SaveOutlined } from '@ant-design/icons';
+import api from '../api/client';
+
+interface SiteSettings {
+  title: string;
+  subtitle: string;
+  description: string;
+  keywords: string[];
+  author: string;
+  authorBio: string;
+  bannerImages: string[];
+  announcement: string;
+  footer: string;
+  socialLinks: {
+    github: string;
+    bilibili: string;
+    email: string;
+  };
+  musicPlaylist: { title: string; artist: string }[];
+  sidebarWidgets: Record<string, boolean>;
+  homepageSections: Record<string, boolean>;
+}
 
 export default function SettingsPage() {
-  const handleSave = () => {
-    message.success('设置已保存（演示）');
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+
+  useEffect(() => {
+    api.get('/settings')
+      .then((res: any) => {
+        form.setFieldsValue(res.data);
+      })
+      .catch(() => message.warning('无法加载设置，使用默认值'))
+      .finally(() => setFetching(false));
+  }, [form]);
+
+  const handleSave = async (values: SiteSettings) => {
+    setLoading(true);
+    try {
+      await api.put('/settings', values);
+      message.success('站点设置已保存 ✅');
+    } catch {
+      message.error('保存失败，请重试');
+    } finally {
+      setLoading(false);
+    }
   };
 
+  if (fetching) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
+
   return (
-    <div>
-      <h2 style={{ marginBottom: 16 }}>站点设置</h2>
-      <Card style={{ maxWidth: 600 }}>
-        <Form layout="vertical" onFinish={handleSave}>
-          <Form.Item label="站点名称" name="siteName" initialValue="二次元博客">
+    <div style={{ maxWidth: 900 }}>
+      <h2 style={{ marginBottom: 24 }}>⚙️ 站点设置</h2>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSave}
+        initialValues={{
+          title: '🌸 小破站',
+          subtitle: 'わたしの部屋',
+          description: '二次元风格个人博客 - 记录生活与技术',
+          keywords: ['博客', '二次元', '前端', 'Astro'],
+          author: 'まつざか ゆき',
+          authorBio: '一个热爱二次元的前端开发者。',
+          bannerImages: ['', ''],
+          announcement: 'ブログへようこそ！',
+          footer: '© 2025 まつざか ゆき. All Rights Reserved.',
+          socialLinks: { github: '', bilibili: '', email: '' },
+          sidebarWidgets: { stats: true, announcement: true, categories: true, tags: true, music: true, calendar: true },
+          homepageSections: { hero: true, about: true, posts: true, stats: true, quickLinks: true },
+        }}
+      >
+        {/* ===== 基本信息 ===== */}
+        <Card title="📋 基本信息" style={{ marginBottom: 16 }}>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="站点标题" name="title" rules={[{ required: true }]}>
+                <Input placeholder="🌸 小破站" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="副标题" name="subtitle">
+                <Input placeholder="わたしの部屋" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item label="站点描述" name="description">
+            <Input.TextArea rows={2} placeholder="用于 SEO 和首页展示" />
+          </Form.Item>
+          <Form.Item label="关键词" name="keywords">
+            <Input placeholder="逗号分隔，用于 SEO" />
+          </Form.Item>
+        </Card>
+
+        {/* ===== 站长信息 ===== */}
+        <Card title="👤 站长信息" style={{ marginBottom: 16 }}>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="昵称" name="author">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item label="个人简介" name="authorBio">
+            <Input.TextArea rows={3} placeholder="展示在首页个人卡片中" />
+          </Form.Item>
+        </Card>
+
+        {/* ===== 社交链接 ===== */}
+        <Card title="🔗 社交链接" style={{ marginBottom: 16 }}>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item label="GitHub" name={['socialLinks', 'github']}>
+                <Input placeholder="https://github.com/..." />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="Bilibili" name={['socialLinks', 'bilibili']}>
+                <Input placeholder="https://space.bilibili.com/..." />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="Email" name={['socialLinks', 'email']}>
+                <Input placeholder="example@mail.com" />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* ===== 首页配置 ===== */}
+        <Card title="🏠 首页配置" style={{ marginBottom: 16 }}>
+          <Form.Item label="Banner 图片 (每行一个URL)" name="bannerImages">
+            <Input.TextArea rows={3} placeholder="https://..." />
+          </Form.Item>
+          <Form.Item label="首页公告" name="announcement">
+            <Input.TextArea rows={2} />
+          </Form.Item>
+          <Divider plain>首页区块开关</Divider>
+          <Space size="large" wrap>
+            <Form.Item label="Hero大屏" name={['homepageSections', 'hero']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item label="个人卡片" name={['homepageSections', 'about']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item label="文章列表" name={['homepageSections', 'posts']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item label="统计数字" name={['homepageSections', 'stats']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item label="快捷入口" name={['homepageSections', 'quickLinks']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </Space>
+        </Card>
+
+        {/* ===== 侧边栏配置 ===== */}
+        <Card title="📱 侧边栏 Widget 开关" style={{ marginBottom: 16 }}>
+          <Space size="large" wrap>
+            <Form.Item label="站点统计" name={['sidebarWidgets', 'stats']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item label="公告栏" name={['sidebarWidgets', 'announcement']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item label="分类云" name={['sidebarWidgets', 'categories']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item label="标签云" name={['sidebarWidgets', 'tags']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item label="音乐播放器" name={['sidebarWidgets', 'music']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item label="日历" name={['sidebarWidgets', 'calendar']} valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </Space>
+        </Card>
+
+        {/* ===== 页脚 ===== */}
+        <Card title="📄 页脚" style={{ marginBottom: 24 }}>
+          <Form.Item label="页脚文字" name="footer">
             <Input />
           </Form.Item>
-          <Form.Item label="站点描述" name="siteDesc" initialValue="一个二次元风格的个人博客">
-            <Input.TextArea rows={3} />
-          </Form.Item>
-          <Form.Item label="站长邮箱" name="email" initialValue="hello@example.com">
-            <Input />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">保存设置</Button>
-          </Form.Item>
-        </Form>
-      </Card>
+        </Card>
+
+        <Form.Item>
+          <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading} size="large">
+            保存全部设置
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
 }
