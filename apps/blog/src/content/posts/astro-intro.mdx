@@ -1,0 +1,66 @@
+---
+title: "Astro 静态站点生成器入门"
+slug: "astro-intro"
+published: 2025-03-10
+description: "Astro 是一个现代化的静态站点生成器，支持多框架组件和零 JS 输出。本文介绍其核心概念和最佳实践。"
+image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
+tags: ["Astro", "Frontend"]
+category: "技术分享"
+---
+
+## 为什么选择 Astro？
+
+Astro 是构建内容驱动网站的最佳选择。它的核心理念是**岛屿架构**（Islands Architecture）——页面上大部分内容是静态 HTML，只有需要交互的部分才加载 JavaScript。
+
+### 核心优势
+
+- 🚀 **零 JS 默认输出**：没有交互的组件不发送任何 JS
+- 🏝️ **岛屿架构**：React/Vue/Svelte 组件可以混合使用
+- 📦 **按需水合**：只在需要时激活交互组件
+- 🎨 **内容集合**：类型安全的内容管理
+
+### 内容集合示例
+
+```typescript
+// src/content.config.ts
+import { defineCollection, z } from 'astro:content';
+
+const posts = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    published: z.date(),
+    description: z.string(),
+    image: z.string().optional(),
+    tags: z.array(z.string()),
+    category: z.string(),
+  }),
+});
+
+export const collections = { posts };
+```
+
+### 视图过渡
+
+Astro 内置了视图过渡 API，让页面切换拥有丝滑的 SPA 体验：
+
+```astro
+---
+import { ViewTransitions } from 'astro:transitions';
+---
+<html>
+  <head>
+    <ViewTransitions />
+  </head>
+  <body>...</body>
+</html>
+```
+
+## 部署
+
+Astro 项目可以部署到任何静态托管平台——Vercel、Netlify、Cloudflare Pages、GitHub Pages，只需一条命令：
+
+```bash
+astro build
+```
+
+输出在 `dist/` 目录，直接上传即可。

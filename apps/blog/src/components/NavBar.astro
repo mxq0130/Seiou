@@ -9,9 +9,14 @@ const navLinks = [
   { href: '/about', label: '关于' },
 ];
 const currentPath = Astro.url.pathname;
+const isHome = currentPath === '/';
 ---
 
-<header class="glass sticky top-0 z-50 border-b border-[var(--color-border)]">
+<header
+  id="navbar"
+  class={`fixed top-0 left-0 right-0 z-50 transition-all duration-500
+    ${isHome ? 'bg-transparent' : 'glass border-b border-[var(--color-border)]'}`}
+>
   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
       <a href="/" class="flex items-center gap-2 text-xl font-bold shrink-0" style="font-family: var(--font-title)">
@@ -20,36 +25,38 @@ const currentPath = Astro.url.pathname;
 
       <div class="hidden md:flex items-center gap-1">
         {navLinks.map(link => (
-          <a href={link.href} class={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150
+          <a href={link.href} class={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300
             ${currentPath === link.href
-              ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
-              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]'}`}>
+              ? (isHome ? 'bg-white/15 text-white' : 'bg-[var(--color-primary-light)] text-[var(--color-primary)]')
+              : (isHome ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]')
+            }`}>
             {link.label}
           </a>
         ))}
       </div>
 
       <div class="flex items-center gap-2">
-        <a href="/search" class="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)] transition-all" title="搜索" aria-label="搜索">
+        <a href="/search" class={`p-2 rounded-lg transition-all duration-300 ${isHome ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]'}`} title="搜索" aria-label="搜索">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </a>
-        <button id="theme-toggle" class="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)] transition-all" title="切换主题" aria-label="切换主题">
+        <button id="theme-toggle" class={`p-2 rounded-lg transition-all duration-300 ${isHome ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]'}`} title="切换主题" aria-label="切换主题">
           <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
-        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)] transition-all" aria-label="菜单">
+        <button id="mobile-menu-btn" class={`md:hidden p-2 rounded-lg transition-all duration-300 ${isHome ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]'}`} aria-label="菜单">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
       </div>
     </div>
 
-    <div id="mobile-menu" class="md:hidden hidden pb-4 border-t border-[var(--color-border)] pt-3">
+    <div id="mobile-menu" class="md:hidden hidden pb-4 pt-3">
       <div class="flex flex-col gap-1">
         {navLinks.map(link => (
           <a href={link.href} class={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150
             ${currentPath === link.href
-              ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
-              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]'}`}>
+              ? (isHome ? 'bg-white/15 text-white' : 'bg-[var(--color-primary-light)] text-[var(--color-primary)]')
+              : (isHome ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]')
+            }`}>
             {link.label}
           </a>
         ))}
@@ -59,6 +66,7 @@ const currentPath = Astro.url.pathname;
 </header>
 
 <script is:inline>
+  // 主题切换
   const toggle = document.getElementById('theme-toggle');
   const sunIcon = document.getElementById('icon-sun');
   const moonIcon = document.getElementById('icon-moon');
@@ -77,7 +85,29 @@ const currentPath = Astro.url.pathname;
     updateIcons();
   });
 
+  // 移动端菜单
   document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
     document.getElementById('mobile-menu')?.classList.toggle('hidden');
   });
+
+  // 首页 NavBar 滚动切换
+  const navbar = document.getElementById('navbar');
+  if (navbar && window.location.pathname === '/') {
+    const hero = document.querySelector('.hero-root');
+    if (hero) {
+      const obs = new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) {
+          navbar.classList.add('bg-transparent');
+          navbar.classList.remove('glass', 'border-b');
+          navbar.style.setProperty('--tw-border-style', 'none');
+        } else {
+          navbar.classList.remove('bg-transparent');
+          navbar.classList.add('glass', 'border-b');
+          navbar.style.setProperty('--tw-border-style', '');
+          navbar.style.borderColor = 'var(--color-border)';
+        }
+      }, { threshold: 0, rootMargin: '-64px 0px 0px 0px' });
+      obs.observe(hero);
+    }
+  }
 </script>

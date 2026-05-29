@@ -1,196 +1,229 @@
----
-// Hero 组件 — 全屏渐变背景 + 樱花粒子 + 打字机 + 滚动指示器
-const subtitle = '记录生活 · 分享技术 · 追番日常';
----
-
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden" id="hero">
-  <!-- 动画渐变背景层 -->
-  <div class="absolute inset-0 hero-bg"></div>
-
-  <!-- 樱花粒子（纯 CSS，24个） -->
-  <div class="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-    {Array.from({ length: 24 }).map((_, i) => {
-      const left = Math.random() * 100;
-      const delay = Math.random() * 15;
-      const duration = 8 + Math.random() * 12;
-      const size = 6 + Math.random() * 14;
-      const drift = -30 + Math.random() * 60;
-      return (
-        <div
-          class="petal"
-          style={{
-            left: `${left}%`,
-            animationDelay: `${delay}s`,
-            animationDuration: `${duration}s`,
-            width: `${size}px`,
-            height: `${size * 1.2}px`,
-            '--drift': `${drift}px`,
-          }}
-        ></div>
-      );
-    })}
+<section class="hero-root">
+  <!-- 背景图 + 深色遮罩 -->
+  <div class="hero-bg">
+    <img
+      src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1920&h=1080&fit=crop"
+      alt=""
+      class="hero-img"
+      fetchpriority="high"
+    />
+    <div class="hero-overlay"></div>
   </div>
 
-  <!-- 光晕装饰 -->
-  <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20" style="background: var(--color-primary)"></div>
-  <div class="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-15" style="background: var(--color-secondary)"></div>
+  <!-- 几何光效 -->
+  <div class="hero-lights" aria-hidden="true">
+    <div class="light light-1"></div>
+    <div class="light light-2"></div>
+    <div class="light light-3"></div>
+  </div>
 
-  <!-- 内容区 -->
-  <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
-    <!-- 站点标题 -->
-    <h1
-      class="text-5xl sm:text-6xl lg:text-8xl font-bold mb-6 hero-title"
-      style="font-family: var(--font-title); text-shadow: 0 0 80px rgba(232,115,138,0.3);"
-    >
-      <span class="gradient-text">わたしの部屋</span>
+  <!-- 内容 -->
+  <div class="hero-content">
+    <p class="hero-eyebrow">PERSONAL BLOG</p>
+    <h1 class="hero-title">
+      <span class="title-line">创造与分享</span>
+      <span class="title-line accent">皆为热爱</span>
     </h1>
-
-    <!-- 副标题（打字机效果） -->
-    <p class="text-lg sm:text-xl lg:text-2xl text-[var(--color-text-secondary)] mb-10 typing-text min-h-[2em]">
-      <span id="typing-target"></span>
-      <span class="typing-cursor">|</span>
+    <p class="hero-desc">
+      一个二次元爱好者的技术博客。记录前端开发、动画追番与生活随笔。
     </p>
-
-    <!-- CTA 按钮 -->
-    <div class="flex flex-wrap items-center justify-center gap-4">
-      <a href="#posts"
-         class="px-8 py-3 rounded-full text-white font-medium text-lg
-                bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]
-                hover:shadow-lg hover:shadow-[var(--color-primary)]/30
-                transition-all duration-300 hover:-translate-y-0.5">
-        📖 探索文章
+    <div class="hero-actions">
+      <a href="#posts" class="btn-primary">
+        <span>浏览文章</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9-5-9-5"/></svg>
       </a>
-      <a href="/about"
-         class="px-8 py-3 rounded-full font-medium text-lg
-                border-2 border-[var(--color-primary)] text-[var(--color-primary)]
-                hover:bg-[var(--color-primary)] hover:text-white
-                transition-all duration-300 hover:-translate-y-0.5 glass">
-        👤 关于我
-      </a>
+      <a href="/about" class="btn-ghost">关于我</a>
     </div>
   </div>
 
-  <!-- 向下滚动指示器 -->
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 scroll-indicator">
-    <div class="w-6 h-10 rounded-full border-2 border-[var(--color-text-secondary)]/40 flex justify-center">
-      <div class="w-1.5 h-3 rounded-full bg-[var(--color-primary)] mt-2 scroll-dot"></div>
-    </div>
+  <!-- 底部滚动线 -->
+  <div class="scroll-hint" aria-hidden="true">
+    <div class="scroll-line"></div>
   </div>
 </section>
 
 <style>
-  /* 动画渐变背景 */
+  .hero-root {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+  }
+
+  /* 背景 */
   .hero-bg {
-    background: linear-gradient(135deg,
-      var(--color-bg) 0%,
-      var(--color-primary-light) 30%,
-      var(--color-bg) 50%,
-      rgba(107,125,179,0.15) 70%,
-      var(--color-bg) 100%
-    );
-    background-size: 400% 400%;
-    animation: bgShift 15s ease infinite;
-  }
-
-  @keyframes bgShift {
-    0%, 100% { background-position: 0% 50%; }
-    25% { background-position: 100% 0%; }
-    50% { background-position: 100% 100%; }
-    75% { background-position: 0% 100%; }
-  }
-
-  /* 标题呼吸发光 */
-  .hero-title {
-    animation: titleGlow 3s ease-in-out infinite;
-  }
-
-  @keyframes titleGlow {
-    0%, 100% { filter: drop-shadow(0 0 20px rgba(232,115,138,0.2)); }
-    50% { filter: drop-shadow(0 0 40px rgba(232,115,138,0.4)); }
-  }
-
-  /* 打字机光标 */
-  .typing-cursor {
-    animation: blink 0.8s step-end infinite;
-    color: var(--color-primary);
-    font-weight: 100;
-  }
-
-  @keyframes blink {
-    50% { opacity: 0; }
-  }
-
-  /* 樱花粒子 */
-  .petal {
     position: absolute;
-    top: -20px;
-    background: linear-gradient(180deg, rgba(255,183,197,0.8), rgba(255,183,197,0.2));
-    border-radius: 50% 0 50% 0;
-    animation: fall linear infinite;
-    opacity: 0;
+    inset: 0;
+  }
+  .hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.05);
+    animation: heroDrift 20s ease-in-out infinite alternate;
+  }
+  @keyframes heroDrift {
+    0% { transform: scale(1.05) translate(0, 0); }
+    100% { transform: scale(1.08) translate(-1%, -0.5%); }
   }
 
-  @keyframes fall {
-    0% {
-      transform: translateY(-10px) translateX(0) rotate(0deg);
-      opacity: 0;
-    }
-    5% {
-      opacity: 0.7;
-    }
-    90% {
-      opacity: 0.5;
-    }
-    100% {
-      transform: translateY(100vh) translateX(var(--drift, 30px)) rotate(720deg);
-      opacity: 0;
-    }
-  }
-
-  /* 滚动指示器 */
-  .scroll-dot {
-    animation: scrollBounce 2s ease-in-out infinite;
-  }
-
-  @keyframes scrollBounce {
-    0%, 100% { transform: translateY(0); opacity: 1; }
-    50% { transform: translateY(8px); opacity: 0.3; }
-  }
-
-  /* 深色模式适配 */
-  :root.dark .petal {
-    background: linear-gradient(180deg, rgba(240,160,181,0.6), rgba(240,160,181,0.1));
-  }
-
-  :root.dark .hero-bg {
-    background: linear-gradient(135deg,
-      var(--color-bg) 0%,
-      rgba(240,160,181,0.1) 30%,
-      var(--color-bg) 50%,
-      rgba(157,175,222,0.1) 70%,
-      var(--color-bg) 100%
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(30, 20, 40, 0.75) 0%,
+      rgba(30, 20, 40, 0.45) 50%,
+      rgba(20, 15, 35, 0.7) 100%
     );
-    background-size: 400% 400%;
+  }
+
+  /* 几何光效 */
+  .hero-lights { position: absolute; inset: 0; overflow: hidden; }
+  .light {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.12;
+    animation: lightPulse 8s ease-in-out infinite alternate;
+  }
+  .light-1 {
+    width: 600px; height: 600px;
+    top: -200px; right: -100px;
+    background: #E8738A;
+    animation-delay: 0s;
+  }
+  .light-2 {
+    width: 450px; height: 450px;
+    bottom: -100px; left: -50px;
+    background: #6B7DB3;
+    animation-delay: 3s;
+  }
+  .light-3 {
+    width: 300px; height: 300px;
+    top: 40%; left: 50%;
+    background: #7EC8E3;
+    animation-delay: 6s;
+  }
+  @keyframes lightPulse {
+    0% { opacity: 0.06; transform: scale(1); }
+    100% { opacity: 0.16; transform: scale(1.15); }
+  }
+
+  /* 内容 */
+  .hero-content {
+    position: absolute;
+    bottom: 18%;
+    left: 0;
+    right: 0;
+    padding: 0 clamp(1.5rem, 8vw, 8rem);
+    z-index: 2;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    font-family: var(--font-mono);
+  }
+
+  .hero-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    margin-bottom: 1.5rem;
+  }
+
+  .title-line {
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .title-line.accent {
+    background: linear-gradient(135deg, #F0A0B5 0%, #9DAFDE 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-desc {
+    font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+    color: rgba(255,255,255,0.55);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+  }
+
+  /* 按钮 */
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    border-radius: 9999px;
+    background: rgba(255,255,255,0.95);
+    color: #1a1a2e;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  .btn-primary:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.85rem 2rem;
+    border-radius: 9999px;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  .btn-ghost:hover {
+    border-color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-2px);
+  }
+
+  /* 滚动提示 */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0%, 100% { transform: scaleY(0.4); opacity: 0.3; }
+    50% { transform: scaleY(1); opacity: 1; }
   }
 </style>
-
-<script is:inline>
-  // 打字机效果
-  (function() {
-    const target = document.getElementById('typing-target');
-    if (!target) return;
-    const text = '记录生活 · 分享技术 · 追番日常';
-    let i = 0;
-    function type() {
-      if (i <= text.length) {
-        target.textContent = text.slice(0, i);
-        i++;
-        setTimeout(type, 80 + Math.random() * 60);
-      } else {
-        // 完成后等待，然后删除重新开始
-        setTimeout(() => { i = 0; type(); }, 4000);
-      }
-    }
-    setTimeout(type, 500);
-  })();
-</script>

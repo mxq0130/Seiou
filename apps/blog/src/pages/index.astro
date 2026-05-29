@@ -1,95 +1,93 @@
 ---
+import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 
-// 文章数据
-const posts = [
-  { title: 'Markdown 写作完全指南', slug: 'markdown-guide', excerpt: '掌握 Markdown 的所有语法，包括扩展功能如数学公式、Mermaid 图表、代码块增强等。', cover: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop', category: '示例文章', tags: ['Markdown','Blogging'], date: '2025-01-20', readingTime: 8, pinned: true },
-  { title: '加密文章示例', slug: 'encrypted-post', excerpt: '这篇文章已被加密，需要输入密码才能查看内容。🔒', category: '技术分享', tags: ['Encryption','Test'], date: '2024-01-15', readingTime: 3 },
-  { title: 'Markdown 扩展功能展示', slug: 'markdown-extended', excerpt: '了解 Callout 提示框、GitHub 卡片、视频嵌入等扩展功能。', cover: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=600&fit=crop', category: '示例文章', tags: ['Markdown','Demo','Example','Mizuki'], date: '2024-05-01', readingTime: 5 },
-  { title: 'Mizuki 主题简易上手指南', slug: 'mizuki-guide', excerpt: '如何快速上手使用 Mizuki 博客主题，包括配置修改、文章编写和部署上线。', cover: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=500&fit=crop', category: '使用指南', tags: ['Mizuki','Blogging','Customization'], date: '2024-04-01', readingTime: 6 },
-  { title: '在文章中嵌入 Mermaid 图表', slug: 'mermaid-demo', excerpt: '使用 Mermaid 在文章中绘制流程图、时序图、甘特图等，让你的技术文章更加生动。', cover: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=350&fit=crop', category: '示例文章', tags: ['Markdown','Mermaid'], date: '2023-10-01', readingTime: 4 },
-  { title: '在文章中嵌入视频', slug: 'video-post', excerpt: '这篇文章演示如何在博客文章中嵌入 Bilibili / YouTube 视频。', category: '示例文章', tags: ['Example','Video'], date: '2022-08-01', readingTime: 2 },
-];
+// 从内容集合获取文章
+const allPosts = await getCollection('posts', ({ data }) => !data.draft);
+const posts = allPosts
+  .sort((a, b) => b.data.published.getTime() - a.data.published.getTime())
+  .slice(0, 6);
 
-const categories = [...new Set(posts.map(p => p.category))];
+// 分类去重
+const categories = [...new Set(posts.map(p => p.data.category))];
 
-// CTA 入口
-const quickLinks = [
-  { icon:'🎬', title:'追番列表', desc:'记录追番旅程', href:'/anime', color:'from-pink-400 to-rose-500' },
-  { icon:'📷', title:'图集相册', desc:'美好瞬间定格', href:'/albums', color:'from-violet-400 to-purple-500' },
-  { icon:'📔', title:'生活日记', desc:'随时随地记录', href:'/diary', color:'from-sky-400 to-blue-500' },
-  { icon:'👤', title:'关于我', desc:'了解更多信息', href:'/about', color:'from-emerald-400 to-teal-500' },
-];
-
+// 统计
 const stats = [
-  { value: 6, label: '文章', icon: '📝' },
-  { value: 3, label: '分类', icon: '📂' },
-  { value: 10, label: '标签', icon: '🏷️' },
-  { value: 365, label: '运行天数', icon: '⏱' },
+  { value: allPosts.length, label: '文章', icon: '📝' },
+  { value: categories.length, label: '分类', icon: '📂' },
+  { value: [...new Set(posts.flatMap(p => p.data.tags))].length, label: '标签', icon: '🏷️' },
+  { value: '365+', label: '运行天数', icon: '⏱' },
+];
+
+const quickLinks = [
+  { icon:'🎬', title:'追番列表', desc:'记录追番旅程', href:'/anime' },
+  { icon:'📷', title:'图集相册', desc:'美好瞬间定格', href:'/albums' },
+  { icon:'📔', title:'生活日记', desc:'随时随地记录', href:'/diary' },
+  { icon:'👤', title:'关于我', desc:'了解更多信息', href:'/about' },
 ];
 ---
 
 <Layout title="首页" noSidebar>
-  <!-- ===== 1. Hero 全屏区 ===== -->
+  <!-- ===== Hero 全屏 ===== -->
   <Hero />
 
-  <!-- ===== 2. 个人介绍卡片 ===== -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20">
-    <ScrollReveal type="scale">
-      <div class="glass rounded-2xl p-8 text-center max-w-lg mx-auto" style="box-shadow: var(--shadow-card)">
-        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white text-3xl" style="font-family: var(--font-title)">雪</div>
-        <h2 class="text-xl font-bold mb-2" style="font-family: var(--font-heading)">まつざか ゆき</h2>
-        <p class="text-sm text-[var(--color-text-secondary)] mb-4 leading-relaxed">
-          一个热爱二次元的前端开发者。喜欢摄影、追番、写代码。<br/>这个博客记录了我的学习、生活和兴趣。
-        </p>
-        <div class="flex items-center justify-center gap-3">
-          <a href="https://github.com" target="_blank" rel="noopener" class="w-9 h-9 rounded-full bg-[var(--color-primary-light)] flex items-center justify-center text-sm hover:bg-[var(--color-primary)] hover:text-white transition-all" title="GitHub">🐙</a>
-          <a href="https://bilibili.com" target="_blank" rel="noopener" class="w-9 h-9 rounded-full bg-[var(--color-primary-light)] flex items-center justify-center text-sm hover:bg-[var(--color-primary)] hover:text-white transition-all" title="Bilibili">📺</a>
-          <a href="mailto:example@boke.local" class="w-9 h-9 rounded-full bg-[var(--color-primary-light)] flex items-center justify-center text-sm hover:bg-[var(--color-primary)] hover:text-white transition-all" title="Email">📧</a>
-        </div>
-      </div>
-    </ScrollReveal>
-  </section>
-
-  <!-- ===== 3. 瀑布流文章 ===== -->
-  <section id="posts" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+  <!-- ===== 瀑布流文章 ===== -->
+  <section id="posts" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
     <ScrollReveal>
-      <h2 class="text-3xl sm:text-4xl font-bold text-center mb-4 gradient-text" style="font-family: var(--font-heading)">
-        📖 最新文章
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4 tracking-tight">
+        <span class="gradient-text">最新文章</span>
       </h2>
-      <p class="text-center text-[var(--color-text-secondary)] mb-8">探索更多有趣的内容</p>
+      <p class="text-[var(--color-text-secondary)] text-lg mb-10 max-w-xl">
+        探索更多有趣的内容。从技术教程到生活随笔，这里都有。
+      </p>
     </ScrollReveal>
 
     <!-- 分类筛选 -->
-    <div class="flex flex-wrap justify-center gap-2 mb-10">
-      <button class="px-4 py-1.5 rounded-full text-sm bg-[var(--color-primary)] text-white transition-all filter-btn active" data-cat="all">全部</button>
+    <div class="flex flex-wrap gap-2 mb-10">
+      <button class="filter-btn active px-4 py-1.5 rounded-full text-sm font-medium bg-[var(--color-text)] text-[var(--color-bg)] transition-all" data-cat="all">全部</button>
       {categories.map(cat => (
-        <button class="px-4 py-1.5 rounded-full text-sm bg-[var(--color-primary-light)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all filter-btn" data-cat={cat}>{cat}</button>
+        <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text)] hover:text-[var(--color-text)] transition-all" data-cat={cat}>{cat}</button>
       ))}
     </div>
 
-    <!-- 瀑布流布局 -->
+    <!-- 瀑布流 -->
     <div class="masonry">
       {posts.map((post, i) => (
-        <div class="masonry-item" data-category={post.category || ''}>
-          <ScrollReveal type="fade-up" delay={i * 100}>
-            <a href={`/posts/${post.slug}`} class="block group">
-              <article class="glass rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-xl hover:shadow-[var(--color-primary)]/10" style="box-shadow: var(--shadow-card)">
-                {post.cover && (
+        <div class="masonry-item" data-category={post.data.category}>
+          <ScrollReveal type="fade-up" delay={i * 80}>
+            <a href={`/posts/${post.data.slug}`} class="block group">
+              <article class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] transition-all duration-400 hover:-translate-y-1 hover:border-[var(--color-primary)]/30 hover:shadow-2xl hover:shadow-[var(--color-primary)]/5">
+                {post.data.image && (
                   <div class="overflow-hidden">
-                    <img src={post.cover} alt={post.title} class="w-full object-cover transition-transform duration-700 group-hover:scale-110" style={`height: ${180 + (i % 3) * 60}px`} loading="lazy" />
+                    <img
+                      src={post.data.image}
+                      alt={post.data.title}
+                      class="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      loading="lazy"
+                    />
                   </div>
                 )}
-                <div class="p-5">
-                  {post.pinned && <span class="inline-flex items-center gap-1 text-xs text-[var(--color-primary)] mb-2">📌 置顶</span>}
-                  <h3 class="text-base font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-2 mb-2" style="font-family: var(--font-heading)">{post.title}</h3>
-                  {post.excerpt && <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3">{post.excerpt}</p>}
-                  <div class="flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-secondary)]">
-                    <time>{new Date(post.date).toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'})}</time>
-                    {post.readingTime && <span>⏱ {post.readingTime}分</span>}
-                    {post.category && <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)]">{post.category}</span>}
+                <div class="p-5 sm:p-6">
+                  {post.data.pinned && (
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] mb-2 tracking-wide uppercase">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span> 置顶
+                    </span>
+                  )}
+                  <h3 class="text-lg font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-3 mb-2 leading-snug tracking-tight">
+                    {post.data.title}
+                  </h3>
+                  <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3 leading-relaxed">
+                    {post.data.description}
+                  </p>
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-secondary)]">
+                    <time datetime={post.data.published.toISOString()}>
+                      {post.data.published.toLocaleDateString('zh-CN', { year:'numeric', month:'short', day:'numeric' })}
+                    </time>
+                    <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs font-medium">
+                      {post.data.category}
+                    </span>
                   </div>
                 </div>
               </article>
@@ -100,19 +98,19 @@ const stats = [
     </div>
   </section>
 
-  <!-- ===== 4. 统计数字 ===== -->
-  <section class="py-20" style="background: linear-gradient(135deg, var(--color-primary-light), transparent)">
+  <!-- ===== 统计数字 ===== -->
+  <section class="py-20 border-t border-[var(--color-border)]">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <ScrollReveal>
-        <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 gradient-text" style="font-family: var(--font-heading)">📊 站点统计</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold text-center mb-12 tracking-tight">站点数据</h2>
       </ScrollReveal>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
         {stats.map((stat, i) => (
-          <ScrollReveal type="scale" delay={i * 150}>
-            <div class="glass rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-1" style="box-shadow: var(--shadow-card)">
-              <div class="text-3xl mb-2">{stat.icon}</div>
-              <div class="text-3xl sm:text-4xl font-bold text-[var(--color-primary)] count-up" data-target={stat.value} style="font-family: var(--font-heading)">0</div>
-              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{stat.label}</div>
+          <ScrollReveal type="scale" delay={i * 120}>
+            <div class="text-center group">
+              <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">{stat.icon}</div>
+              <div class="text-3xl sm:text-4xl font-extrabold text-[var(--color-text)] tracking-tight count-up" data-target={String(stat.value)}>0</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1 font-medium">{stat.label}</div>
             </div>
           </ScrollReveal>
         ))}
@@ -120,88 +118,79 @@ const stats = [
     </div>
   </section>
 
-  <!-- ===== 5. 快捷入口 ===== -->
-  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-    <ScrollReveal>
-      <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 gradient-text" style="font-family: var(--font-heading)">🚀 探索更多</h2>
-    </ScrollReveal>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {quickLinks.map((link, i) => (
-        <ScrollReveal type="scale" delay={i * 120}>
-          <a href={link.href} class="block glass rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 group" style="box-shadow: var(--shadow-card)">
-            <div class="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{link.icon}</div>
-            <h3 class="text-sm font-semibold text-[var(--color-text)] mb-1">{link.title}</h3>
-            <p class="text-xs text-[var(--color-text-secondary)]">{link.desc}</p>
-          </a>
-        </ScrollReveal>
-      ))}
+  <!-- ===== 快捷入口 ===== -->
+  <section class="py-20 border-t border-[var(--color-border)]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <ScrollReveal>
+        <h2 class="text-2xl sm:text-3xl font-bold text-center mb-12 tracking-tight">探索更多</h2>
+      </ScrollReveal>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {quickLinks.map((link, i) => (
+          <ScrollReveal type="scale" delay={i * 100}>
+            <a href={link.href} class="block rounded-2xl border border-[var(--color-border)] p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-primary)]/30 hover:shadow-lg group bg-[var(--color-surface)]">
+              <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">{link.icon}</div>
+              <h3 class="text-sm font-bold text-[var(--color-text)] mb-1 tracking-tight">{link.title}</h3>
+              <p class="text-xs text-[var(--color-text-secondary)]">{link.desc}</p>
+            </a>
+          </ScrollReveal>
+        ))}
+      </div>
     </div>
   </section>
 </Layout>
 
 <style>
-  /* 瀑布流 CSS columns */
   .masonry {
     column-count: 3;
-    column-gap: 1.25rem;
+    column-gap: 1.5rem;
   }
-  @media (max-width: 1024px) {
-    .masonry { column-count: 2; }
-  }
-  @media (max-width: 640px) {
-    .masonry { column-count: 1; }
-  }
+  @media (max-width: 1024px) { .masonry { column-count: 2; } }
+  @media (max-width: 640px)  { .masonry { column-count: 1; } }
   .masonry-item {
     break-inside: avoid;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
   }
-
-  /* 分类筛选按钮激活态 */
   .filter-btn.active {
-    background: var(--color-primary) !important;
-    color: white !important;
+    background: var(--color-text) !important;
+    color: var(--color-bg) !important;
+    border-color: transparent !important;
   }
 </style>
 
 <script is:inline>
-  // 分类筛选
+  // 瀑布流分类筛选
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const cat = (btn as HTMLElement).dataset.cat;
       document.querySelectorAll('.masonry-item').forEach((item: HTMLElement) => {
-        if (cat === 'all' || item.dataset.category === cat) {
-          item.style.display = '';
-        } else {
-          item.style.display = 'none';
-        }
+        item.style.display = (cat === 'all' || item.dataset.category === cat) ? '' : 'none';
       });
     });
   });
 
   // 统计数字动画
-  const countObserver = new IntersectionObserver((entries) => {
+  const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const el = entry.target as HTMLElement;
-        const target = parseInt(el.dataset.target || '0');
-        const duration = 2000;
+        const raw = el.dataset.target || '0';
+        // 处理 "365+" 这种字符串
+        const suffix = raw.includes('+') ? '+' : '';
+        const target = parseInt(raw.replace('+', ''));
+        const duration = 1800;
         const start = performance.now();
-
         function update(now: number) {
-          const progress = Math.min((now - start) / duration, 1);
-          const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-          el.textContent = Math.floor(ease * target).toString();
-          if (progress < 1) requestAnimationFrame(update);
-          else el.textContent = target.toString();
+          const p = Math.min((now - start) / duration, 1);
+          const ease = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.floor(ease * target) + suffix;
+          if (p < 1) requestAnimationFrame(update);
         }
-
         requestAnimationFrame(update);
-        countObserver.unobserve(el);
+        observer.unobserve(el);
       }
     });
   }, { threshold: 0.5 });
-
-  document.querySelectorAll('.count-up').forEach(el => countObserver.observe(el));
+  document.querySelectorAll('.count-up').forEach(el => observer.observe(el));
 </script>
