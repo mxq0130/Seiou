@@ -60,7 +60,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://example.
 
 <body class="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
   <NavBar />
-  <main class="flex-1">
+  <main class={noSidebar ? '' : 'flex-1'}>
     {noSidebar ? (
       <div class="page-enter">
         <slot />
