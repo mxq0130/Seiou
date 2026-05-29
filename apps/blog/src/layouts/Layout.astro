@@ -81,10 +81,28 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://example.
 </html>
 
 <script is:inline>
+  // 主题初始化
   (function() {
-    const stored = localStorage.getItem('theme');
-    if (stored === 'dark' || (!stored && matchMedia('(prefers-color-scheme: dark)').matches)) {
+    var s = localStorage.getItem('theme');
+    if (s === 'dark' || (!s && matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
     }
+  })();
+
+  // ScrollReveal 动画（纯视觉增强，不影响可见性）
+  (function() {
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          var el = e.target;
+          var d = parseInt(el.getAttribute('data-sr-delay') || '0');
+          setTimeout(function() { el.style.opacity = '1'; el.style.transform = 'none'; }, d);
+          obs.unobserve(el);
+        }
+      });
+    }, { threshold: 0.15 });
+    setTimeout(function() {
+      document.querySelectorAll('.sr').forEach(function(el) { obs.observe(el); });
+    }, 100);
   })();
 </script>

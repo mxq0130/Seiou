@@ -1,78 +1,12 @@
 ---
 export interface Props {
-  /** 动画类型 */
   type?: 'fade-up' | 'fade-left' | 'fade-right' | 'scale';
-  /** 延迟(ms) */
   delay?: number;
-  /** 触发的可见比例 (0-1) */
-  threshold?: number;
 }
 
-const { type = 'fade-up', delay = 0, threshold = 0.15 } = Astro.props;
+const { type = 'fade-up', delay = 0 } = Astro.props;
 ---
 
-<div
-  class="reveal reveal-{type}"
-  data-reveal-delay={delay}
-  data-reveal-threshold={threshold}
->
+<div class="sr" data-sr-type={type} data-sr-delay={delay}>
   <slot />
 </div>
-
-<style>
-  .reveal {
-    opacity: 0;
-    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .reveal.revealed {
-    opacity: 1;
-  }
-
-  .reveal-fade-up {
-    transform: translateY(40px);
-  }
-  .reveal-fade-up.revealed {
-    transform: translateY(0);
-  }
-
-  .reveal-fade-left {
-    transform: translateX(-40px);
-  }
-  .reveal-fade-left.revealed {
-    transform: translateX(0);
-  }
-
-  .reveal-fade-right {
-    transform: translateX(40px);
-  }
-  .reveal-fade-right.revealed {
-    transform: translateX(0);
-  }
-
-  .reveal-scale {
-    transform: scale(0.92);
-  }
-  .reveal-scale.revealed {
-    transform: scale(1);
-  }
-</style>
-
-<script is:inline>
-  (function() {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const el = entry.target as HTMLElement;
-          const delay = parseInt(el.dataset.revealDelay || '0');
-          setTimeout(() => {
-            el.classList.add('revealed');
-          }, delay);
-          observer.unobserve(el);
-        }
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  })();
-</script>
