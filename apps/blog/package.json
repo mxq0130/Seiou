@@ -10,10 +10,12 @@
     "build": "astro build",
     "build:static": "ASTRO_MODE=static astro build",
     "preview": "astro preview",
+    "start": "node ./dist/server/entry.mjs",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.6",
+    "@astrojs/node": "^10.1.2",
     "@astrojs/sitemap": "^3.3.0",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.3.7",
