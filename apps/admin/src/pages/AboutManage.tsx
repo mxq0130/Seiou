@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Form, Input, InputNumber, Button, message, Row, Col, Divider, Spin } from 'antd';
+import { Card, Form, Input, InputNumber, Button, message, Row, Col, Spin } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import api from '../api/client';
 
