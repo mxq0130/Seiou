@@ -3,64 +3,24 @@ import Layout from '../../layouts/Layout.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
 import CommentSection from '../../components/CommentSection.astro';
 
-const post = {
-  title: 'Markdown 写作完全指南',
-  slug: 'markdown-guide',
-  content: `## 什么是 Markdown？
-Markdown 是一种轻量级标记语言，由 John Gruber 于 2004 年创建。
+export function getStaticPaths() {
+  const slugs = ['markdown-guide','astro-intro','tailwind-v4','react-19-rsc','anime-2025','build-blog-guide'];
+  return slugs.map(slug => ({ params: { slug } }));
+}
 
-### 基本语法
-| 元素 | 语法 |
-|------|------|
-| 标题 | # H1 ## H2 ### H3 |
-| 粗体 | **粗体文字** |
-| 斜体 | *斜体文字* |
-| 链接 | [标题](url) |
-| 图片 | ![alt](url) |
-
-### 代码块
-支持多种语言的语法高亮和行号显示。
-
-### 数学公式
-行内公式：$E = mc^2$
-
-块级公式：$$\\int_{a}^{b} f(x) dx = F(b) - F(a)$$
-
-### 提示框
-> [!NOTE] 这是一条温馨提示。
-> [!WARNING] 请注意这条警告信息。
-
-## 总结
-Markdown 让你专注于内容而非排版。`,
-  excerpt: '掌握 Markdown 的所有语法，包括扩展功能如数学公式、Mermaid 图表、代码块增强等。',
-  cover: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&h=600&fit=crop',
-  category: '示例文章',
-  tags: ['Markdown', 'Blogging'],
-  date: '2025-01-20',
-  readingTime: 8,
-  author: { username: 'まつざか ゆき' },
-  prevPost: { title: '加密文章示例', slug: 'encrypted-post' } as any,
-  nextPost: { title: 'Markdown 扩展功能展示', slug: 'markdown-extended' } as any,
+const postMap = {
+  'markdown-guide': { title: 'Markdown 写作完全指南', content: '## 什么是 Markdown？\nMarkdown 是一种轻量级标记语言。', excerpt: '掌握 Markdown 的所有语法', cover: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&h=600&fit=crop', category: '示例文章', tags: ['Markdown','Blogging'], date: '2025-01-20', readingTime: 8 },
+  'astro-intro': { title: 'Astro 静态站点生成器入门', content: '## 为什么选择 Astro？\nAstro 是构建内容驱动网站的最佳选择。', excerpt: 'Astro 是一个现代化的静态站点生成器。', cover: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&h=600&fit=crop', category: '技术分享', tags: ['Astro','Frontend'], date: '2025-03-10', readingTime: 5 },
+  'tailwind-v4': { title: 'Tailwind CSS v4 新特性一览', content: '## Tailwind CSS v4\n带来全新的配置方式。', excerpt: 'Tailwind CSS v4 带来全新配置方式。', cover: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop', category: '技术分享', tags: ['Tailwind','CSS'], date: '2025-04-01', readingTime: 4 },
+  'react-19-rsc': { title: 'React 19 服务器组件深度解析', content: '## React Server Components\nReact 19 改变了数据获取方式。', excerpt: 'React 19 引入服务器组件(RSC)。', cover: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=1200&h=600&fit=crop', category: '技术分享', tags: ['React','RSC'], date: '2025-02-15', readingTime: 6 },
+  'anime-2025': { title: '2025年最值得追的10部新番', content: '## 2025 年新番推荐\n今年是动画大年。', excerpt: '整理了2025年最值得期待的10部新番。', cover: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&h=600&fit=crop', category: '示例文章', tags: ['Anime','推荐'], date: '2025-05-20', readingTime: 3 },
+  'build-blog-guide': { title: '从零搭建个人博客的完整指南', content: '## 为什么要自己搭建博客？\n拥有独立的博客意味着完全的控制权。', excerpt: '一步步教你从零搭建个人博客。', cover: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1200&h=600&fit=crop', category: '使用指南', tags: ['Blogging','Guide'], date: '2025-06-01', readingTime: 7 },
 };
 
-const formattedDate = new Date(post.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+const { slug } = Astro.params;
+const post = postMap[slug as string] || postMap['markdown-guide'];
 
-// 简单 Markdown → HTML 段落的简陋转换（生产环境用 MDX 渲染）
-function renderContent(md: string) {
-  return md.split('\n').map(line => {
-    const trimmed = line.trim();
-    if (!trimmed) return '<br/>';
-    if (trimmed.startsWith('## ')) return `<h2>${trimmed.slice(3)}</h2>`;
-    if (trimmed.startsWith('### ')) return `<h3>${trimmed.slice(4)}</h3>`;
-    if (trimmed.startsWith('> ')) return `<blockquote>${trimmed.slice(2)}</blockquote>`;
-    if (trimmed.startsWith('|')) {
-      const cells = trimmed.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
-      return `<tr>${cells}</tr>`;
-    }
-    if (trimmed.startsWith('- ')) return `<li>${trimmed.slice(2)}</li>`;
-    return `<p>${trimmed}</p>`;
-  }).join('\n');
-}
+const formattedDate = new Date(post.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 
 <Layout title={post.title} description={post.excerpt} image={post.cover} ogType="article">
@@ -70,34 +30,14 @@ function renderContent(md: string) {
     <div class="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-secondary)] mb-8 pb-6 border-b border-[var(--color-border)]">
       <time datetime={post.date}>{formattedDate}</time>
       <span>{post.readingTime} 分钟阅读</span>
-      {post.category && <a href={`/archive?category=${post.category}`} class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs">{post.category}</a>}
-      <span class="text-[var(--color-primary)]">{post.author.username}</span>
+      {post.category && <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs">{post.category}</span>}
     </div>
-    <div class="flex gap-8">
-      <div class="flex-1 min-w-0 prose max-w-none">
-        <Fragment set:html={renderContent(post.content)} />
-      </div>
-      <aside class="hidden xl:block w-56 shrink-0">
-        <TableOfContents content={post.content} />
-      </aside>
+    <div class="prose max-w-none">
+      {post.content.split('\n').map(line => <p>{line}</p>)}
     </div>
     <div class="flex flex-wrap gap-2 mt-10 pt-6 border-t border-[var(--color-border)]">
       {post.tags.map(tag => <a href={`/search?q=${tag}`} class="px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">#{tag}</a>)}
     </div>
-    <nav class="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-[var(--color-border)]">
-      {post.prevPost ? (
-        <a href={`/posts/${post.prevPost.slug}`} class="group p-4 rounded-xl glass hover:-translate-y-0.5 transition-all">
-          <span class="text-xs text-[var(--color-text-secondary)]">← 上一篇</span>
-          <p class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors mt-1">{post.prevPost.title}</p>
-        </a>
-      ) : <div />}
-      {post.nextPost ? (
-        <a href={`/posts/${post.nextPost.slug}`} class="group p-4 rounded-xl glass text-right hover:-translate-y-0.5 transition-all">
-          <span class="text-xs text-[var(--color-text-secondary)]">下一篇 →</span>
-          <p class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors mt-1">{post.nextPost.title}</p>
-        </a>
-      ) : <div />}
-    </nav>
     <div class="mt-12 pt-6 border-t border-[var(--color-border)]"><CommentSection /></div>
   </article>
 </Layout>

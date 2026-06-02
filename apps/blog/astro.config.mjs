@@ -3,15 +3,13 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import node from '@astrojs/node';
+const isStatic = true; // 当前构建为纯静态模式
 
-const isStatic = process.env.ASTRO_MODE === 'static';
-
-// https://astro.build/config
 export default defineConfig({
-  site: 'https://example.com',
-  output: isStatic ? 'static' : 'server',
-  adapter: isStatic ? undefined : node({ mode: 'standalone' }),
+  output: 'server',
+adapter: node({ mode: 'standalone' }),
+  base: './',
+  trailingSlash: 'always',
 
   vite: {
     plugins: [tailwindcss()],
