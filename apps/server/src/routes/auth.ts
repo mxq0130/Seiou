@@ -41,18 +41,21 @@ router.post('/register', async (req, res) => {
 // 登录
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = z.object({
-      email: z.string().email(),
+    const { username, password } = z.object({
+      username: z.string().min(1),
       password: z.string().min(1),
     }).parse(req.body);
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return fail(res, '邮箱或密码错误');
+    const isEmail = username.includes('@');
+    const user = await prisma.user.findFirst({
+      where: isEmail ? { email: username } : { username },
+    });
+    if (!user) return fail(res, '用户名或密码错误');
 
     if (user.status === 'DISABLED') return fail(res, '账号已被禁用', 403);
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return fail(res, '邮箱或密码错误');
+    if (!valid) return fail(res, '用户名或密码错误');
 
     const token = jwt.sign(
       { userId: user.id, role: user.role },
