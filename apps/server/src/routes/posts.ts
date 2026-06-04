@@ -57,6 +57,27 @@ router.get('/', async (req, res) => {
   }
 });
 
+// 管理员：按 ID 获取文章（编辑用，含草稿）
+router.get('/admin/:id', requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(String(req.params.id));
+    if (isNaN(id)) return fail(res, '无效的文章 ID');
+    const post = await prisma.post.findUnique({
+      where: { id },
+      include: {
+        author: { select: { id: true, username: true, avatar: true } },
+        category: { select: { id: true, name: true, slug: true } },
+        tags: { select: { tag: { select: { id: true, name: true, slug: true } } } },
+      },
+    });
+    if (!post) return fail(res, '文章不存在', 404);
+    const result: any = { ...post, tags: (post as any).tags.map((t: any) => t.tag) };
+    return success(res, result);
+  } catch (err: any) {
+    return fail(res, err.message, 500);
+  }
+});
+
 // 公开：文章详情
 router.get('/:slug', optionalAuth, async (req, res) => {
   try {

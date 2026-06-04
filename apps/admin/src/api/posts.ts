@@ -15,8 +15,8 @@ export async function getPosts(params: { page?: number; limit?: number; q?: stri
   return api.get('/posts', { params });
 }
 
-export async function getPost(slug: string) {
-  return api.get(`/posts/${slug}`);
+export async function getPost(id: string) {
+  return api.get(`/posts/admin/${id}`);
 }
 
 export async function createPost(data: PostData) {
