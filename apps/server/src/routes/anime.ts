@@ -36,13 +36,24 @@ router.post('/sync', async (req, res) => {
     if (!uid) return fail(res, '请提供 B站 UID');
 
     // B站公开API：获取用户追番列表
+    // 注意：需要用户在 B站 隐私设置中把「追番/追剧」设为「公开」
     const url = `https://api.bilibili.com/x/space/bangumi/follow/list?vmid=${uid}&type=1&ps=50`;
     const response = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://space.bilibili.com/' },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': `https://space.bilibili.com/${uid}/bangumi`,
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Origin': 'https://space.bilibili.com',
+      },
     });
     const json: any = await response.json();
 
-    if (json.code !== 0) return fail(res, 'B站API返回错误: ' + (json.message || '未知'));
+    if (json.code !== 0) {
+      let hint = '';
+      if (json.code === -400 || json.code === 53000) hint = '（提示：请在 B站 隐私设置中将追番列表设为公开，或提供有效的 Cookie）';
+      return fail(res, `B站API返回错误 [${json.code}]: ${json.message || '未知'}${hint}`);
+    }
 
     const list = json.data?.list || [];
     let count = 0;
