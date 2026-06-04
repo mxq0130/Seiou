@@ -78,25 +78,28 @@ router.post('/sync', async (req, res) => {
     const { uid, cookie } = req.body;
     if (!uid) return fail(res, '请提供 B站 UID');
 
-    // 使用 Wbi 签名调用 B站 API
-    const url = await signUrl('/x/space/bangumi/follow/list', {
-      vmid: String(uid), type: '1', ps: '50',
-    });
     const headers: Record<string, string> = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       'Referer': `https://space.bilibili.com/${uid}/bangumi`,
       'Accept': 'application/json',
-      'Accept-Language': 'zh-CN',
     };
     if (cookie) headers['Cookie'] = cookie;
+
+    // 有 Cookie 时直连，无 Cookie 时才用 Wbi 签名
+    let url: string;
+    if (cookie) {
+      url = `https://api.bilibili.com/x/space/bangumi/follow/list?vmid=${uid}&type=1&ps=50&pn=1&follow_status=0`;
+    } else {
+      url = await signUrl('/x/space/bangumi/follow/list', {
+        vmid: String(uid), type: '1', ps: '50',
+      });
+    }
 
     const response = await fetch(url, { headers });
     const json: any = await response.json();
 
     if (json.code !== 0) {
-      let hint = '';
-      if (json.code === -400 || json.code === 53000) hint = '（请将B站追番隐私设为公开）';
-      return fail(res, `B站API [${json.code}]: ${json.message || '未知'} ${hint}`);
+      return fail(res, `B站API [${json.code}]: ${json.message || '未知'}`);
     }
 
     const list = json.data?.list || [];
