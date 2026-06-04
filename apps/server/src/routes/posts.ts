@@ -94,7 +94,7 @@ router.post('/', requireAdmin, async (req, res) => {
       cover: z.string().max(500).optional(),
       pinned: z.boolean().optional(),
       status: z.enum(['DRAFT', 'PUBLISHED']).optional(),
-      categoryId: z.number().int().optional(),
+      categoryId: z.number().int().optional().nullable(),
       tagIds: z.array(z.number().int()).optional(),
     }).parse(req.body);
 
@@ -150,6 +150,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
         ...(body.content !== undefined && { content: body.content }),
         ...(body.excerpt !== undefined && { excerpt: body.excerpt }),
         ...(body.cover !== undefined && { cover: body.cover }),
+        ...(body.pinned !== undefined && { pinned: body.pinned }),
         ...(body.status && { status: body.status }),
         ...(body.categoryId !== undefined && { categoryId: body.categoryId }),
       },

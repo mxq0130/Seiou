@@ -28,6 +28,11 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
+    // 提取服务端返回的错误消息，避免只显示 "Request failed with status code 400"
+    const serverMsg = err.response?.data?.message;
+    if (serverMsg) {
+      return Promise.reject(new Error(serverMsg));
+    }
     return Promise.reject(err);
   },
 );
