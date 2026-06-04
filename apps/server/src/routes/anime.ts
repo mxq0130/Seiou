@@ -1,6 +1,49 @@
 import { Router } from 'express';
+import { createHash } from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import { success, fail } from '../utils/response.js';
+
+// B站 Wbi 签名混排表
+const MIXIN_KEY_ENC_TAB = [
+  46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35,
+  27, 43, 5, 49, 33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13,
+  37, 48, 7, 16, 24, 55, 40, 61, 26, 17, 0, 1, 60, 51, 30, 4,
+  22, 25, 54, 21, 56, 59, 6, 63, 57, 62, 11, 36, 20, 34, 44, 52,
+];
+
+let wbiCache: { key: string; expire: number } | null = null;
+
+/** 获取 Wbi 混合密钥（缓存1小时） */
+async function getMixKey(): Promise<string> {
+  if (wbiCache && Date.now() < wbiCache.expire) return wbiCache.key;
+
+  const nav = await fetch('https://api.bilibili.com/x/web-interface/nav', {
+    headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.bilibili.com/' },
+  });
+  const json: any = await nav.json();
+  const wbiImg: { img_url: string; sub_url: string } = json?.data?.wbi_img;
+  if (!wbiImg) throw new Error('获取 Wbi 密钥失败');
+
+  const imgKey = (wbiImg.img_url.split('/').pop() || '').split('.')[0];
+  const subKey = (wbiImg.sub_url.split('/').pop() || '').split('.')[0];
+  const raw = imgKey + subKey;
+  const mixed = MIXIN_KEY_ENC_TAB.map(i => raw[i] || '').join('').slice(0, 32);
+
+  wbiCache = { key: mixed, expire: Date.now() + 3600000 };
+  return mixed;
+}
+
+/** 对 URL 添加 Wbi 签名 */
+async function signUrl(path: string, params: Record<string, string>): Promise<string> {
+  const mixKey = await getMixKey();
+  params.wts = String(Math.floor(Date.now() / 1000));
+  const sorted = Object.keys(params).sort().map(k => `${k}=${encodeURIComponent(params[k])}`).join('&');
+  const raw = sorted + mixKey;
+  params.w_rid = createHash('md5').update(raw).digest('hex');
+
+  const qs = Object.entries(params).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+  return `https://api.bilibili.com${path}?${qs}`;
+}
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -35,24 +78,24 @@ router.post('/sync', async (req, res) => {
     const { uid } = req.body;
     if (!uid) return fail(res, '请提供 B站 UID');
 
-    // B站公开API：获取用户追番列表
-    // 注意：需要用户在 B站 隐私设置中把「追番/追剧」设为「公开」
-    const url = `https://api.bilibili.com/x/space/bangumi/follow/list?vmid=${uid}&type=1&ps=50`;
+    // 使用 Wbi 签名调用 B站 API
+    const url = await signUrl('/x/space/bangumi/follow/list', {
+      vmid: String(uid), type: '1', ps: '50',
+    });
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': `https://space.bilibili.com/${uid}/bangumi`,
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-        'Origin': 'https://space.bilibili.com',
+        'Accept': 'application/json',
+        'Accept-Language': 'zh-CN',
       },
     });
     const json: any = await response.json();
 
     if (json.code !== 0) {
       let hint = '';
-      if (json.code === -400 || json.code === 53000) hint = '（提示：请在 B站 隐私设置中将追番列表设为公开，或提供有效的 Cookie）';
-      return fail(res, `B站API返回错误 [${json.code}]: ${json.message || '未知'}${hint}`);
+      if (json.code === -400 || json.code === 53000) hint = '（请将B站追番隐私设为公开）';
+      return fail(res, `B站API [${json.code}]: ${json.message || '未知'} ${hint}`);
     }
 
     const list = json.data?.list || [];
