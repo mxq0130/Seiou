@@ -10,7 +10,7 @@ const isStatic = process.env.ASTRO_MODE === 'static';
 export default defineConfig({
   output: isStatic ? 'static' : 'server',
   adapter: isStatic ? undefined : node({ mode: 'standalone' }),
-  base: './',
+  base: isStatic ? './' : '/',
   trailingSlash: 'always',
 
   vite: {
