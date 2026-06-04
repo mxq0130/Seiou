@@ -1,44 +1,54 @@
 ---
+import { getPosts } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 
-const posts = [
-  { title: 'Markdown 写作完全指南', slug: 'markdown-guide', category: '示例文章', date: '2025-01-20', year: 2025 },
-  { title: '加密文章示例', slug: 'encrypted-post', category: '技术分享', date: '2024-01-15', year: 2024 },
-  { title: 'Markdown 扩展功能展示', slug: 'markdown-extended', category: '示例文章', date: '2024-05-01', year: 2024 },
-  { title: 'Mizuki 主题上手指南', slug: 'mizuki-guide', category: '使用指南', date: '2024-04-01', year: 2024 },
-  { title: 'Mermaid 图表嵌入', slug: 'mermaid-demo', category: '示例文章', date: '2023-10-01', year: 2023 },
-  { title: '嵌入视频文章', slug: 'video-post', category: '示例文章', date: '2022-08-01', year: 2022 },
-];
-const years = [...new Set(posts.map(p => p.year))].sort((a,b) => b-a);
-const categories = [...new Set(posts.map(p => p.category))];
+let posts: any[] = [];
+try {
+  const data = await getPosts({ limit: 999 });
+  posts = data.list || [];
+} catch (e) {
+  console.error('获取归档数据失败:', e);
+}
+
+const postsByYear: Record<number, any[]> = {};
+posts.forEach(p => {
+  const year = new Date(p.createdAt).getFullYear();
+  if (!postsByYear[year]) postsByYear[year] = [];
+  postsByYear[year].push(p);
+});
+const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
+const categories = [...new Set(posts.map(p => p.category?.name).filter(Boolean))] as string[];
 ---
 
 <Layout title="归档">
   <div class="max-w-3xl">
     <h1 class="text-2xl sm:text-3xl font-bold mb-2 gradient-text" style="font-family: var(--font-heading)">📦 归档</h1>
     <p class="text-[var(--color-text-secondary)] mb-8">共 {posts.length} 篇文章</p>
-    <div class="flex flex-wrap gap-2 mb-8">
-      <a href="/archive" class="px-3 py-1 rounded-full text-sm bg-[var(--color-primary)] text-white">全部</a>
-      {categories.map(cat => <a href={`/archive?category=${cat}`} class="px-3 py-1 rounded-full text-sm bg-[var(--color-primary-light)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">{cat}</a>)}
-    </div>
+    {categories.length > 0 && (
+      <div class="flex flex-wrap gap-2 mb-8">
+        <a href="/archive" class="px-3 py-1 rounded-full text-sm bg-[var(--color-primary)] text-white">全部</a>
+        {categories.map(cat => <a href={`/posts?category=${cat}`} class="px-3 py-1 rounded-full text-sm bg-[var(--color-primary-light)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">{cat}</a>)}
+      </div>
+    )}
     <div class="space-y-8">
       {years.map(year => (
         <div>
           <h2 class="text-xl font-bold text-[var(--color-primary)] mb-4 sticky top-20 bg-[var(--color-bg)] py-2 z-10" style="font-family: var(--font-heading)">{year}</h2>
           <div class="space-y-3 relative before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--color-border)]">
-            {posts.filter(p => p.year === year).map(post => (
+            {postsByYear[year].map((post: any) => (
               <a href={`/posts/${post.slug}`} class="flex items-start gap-4 group pl-6 relative">
                 <span class="absolute left-0 top-2 w-3.5 h-3.5 rounded-full border-2 border-[var(--color-primary)] bg-[var(--color-bg)] group-hover:bg-[var(--color-primary)] transition-colors z-10"></span>
-                <time class="text-xs text-[var(--color-text-secondary)] shrink-0 w-24 pt-0.5">{new Date(post.date).toLocaleDateString('zh-CN',{month:'short',day:'numeric'})}</time>
+                <time class="text-xs text-[var(--color-text-secondary)] shrink-0 w-24 pt-0.5">{new Date(post.createdAt).toLocaleDateString('zh-CN',{month:'short',day:'numeric'})}</time>
                 <div class="min-w-0">
                   <span class="text-sm font-medium text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">{post.title}</span>
-                  <span class="text-xs text-[var(--color-text-secondary)]">{post.category}</span>
+                  {post.category && <span class="text-xs text-[var(--color-text-secondary)]">{post.category.name}</span>}
                 </div>
               </a>
             ))}
           </div>
         </div>
       ))}
+      {years.length === 0 && <p class="text-[var(--color-text-secondary)]">还没有文章</p>}
     </div>
   </div>
 </Layout>

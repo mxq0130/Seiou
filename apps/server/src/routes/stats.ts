@@ -1,26 +1,54 @@
 import { Router } from 'express';
-import { success } from '../utils/response.js';
+import { PrismaClient } from '@prisma/client';
+import { success, fail } from '../utils/response.js';
 
+const prisma = new PrismaClient();
 const router = Router();
 
-router.get('/', (_req, res) => {
-  return success(res, {
-    posts: 6,
-    categories: 3,
-    tags: 12,
-    users: 2,
-    comments: 5,
-    runningDays: Math.floor((Date.now() - new Date('2025-01-01').getTime()) / 86400000),
-    recentPosts: [
-      { title:'Markdown写作指南', date:'2025-01-20' },
-      { title:'Astro入门', date:'2025-03-10' },
-      { title:'Tailwind v4', date:'2025-04-01' },
-    ],
-    recentUsers: [
-      { username:'root', role:'ADMIN', createdAt:'2025-01-01' },
-      { username:'user1', role:'USER', createdAt:'2025-06-01' },
-    ],
-  });
+router.get('/', async (_req, res) => {
+  try {
+    const [postCount, categoryCount, userCount, firstPost, recentPosts, recentUsers] = await Promise.all([
+      prisma.post.count({ where: { status: 'PUBLISHED' } }),
+      prisma.category.count(),
+      prisma.user.count(),
+      prisma.post.findFirst({ orderBy: { createdAt: 'asc' }, select: { createdAt: true } }),
+      prisma.post.findMany({
+        where: { status: 'PUBLISHED' },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: { id: true, title: true, createdAt: true },
+      }),
+      prisma.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: { id: true, username: true, role: true, createdAt: true },
+      }),
+    ]);
+
+    const runningDays = firstPost
+      ? Math.floor((Date.now() - new Date(firstPost.createdAt).getTime()) / 86400000) + 1
+      : 0;
+
+    return success(res, {
+      posts: postCount,
+      categories: categoryCount,
+      users: userCount,
+      runningDays,
+      recentPosts: recentPosts.map(p => ({
+        id: p.id,
+        title: p.title,
+        date: new Date(p.createdAt).toISOString().split('T')[0],
+      })),
+      recentUsers: recentUsers.map(u => ({
+        id: u.id,
+        username: u.username,
+        role: u.role,
+        createdAt: new Date(u.createdAt).toISOString().split('T')[0],
+      })),
+    });
+  } catch (err: any) {
+    return fail(res, err.message, 500);
+  }
 });
 
 export default router;

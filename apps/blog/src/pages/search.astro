@@ -1,17 +1,18 @@
 ---
+import { getPosts } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 
-const allPosts = [
-  { title: 'Markdown 写作完全指南', slug: 'markdown-guide', excerpt: '掌握 Markdown 的所有语法', category: '示例文章', tags: ['Markdown', 'Blogging'], date: '2025-01-20' },
-  { title: '加密文章示例', slug: 'encrypted-post', excerpt: '这篇文章已被加密', category: '技术分享', tags: ['Encryption', 'Test'], date: '2024-01-15' },
-  { title: 'Markdown 扩展功能展示', slug: 'markdown-extended', excerpt: '了解 Mizuki 的 Markdown 扩展', category: '示例文章', tags: ['Markdown', 'Demo', 'Example', 'Mizuki'], date: '2024-05-01' },
-  { title: 'Mizuki 主题上手指南', slug: 'mizuki-guide', excerpt: '快速上手 Mizuki 博客主题', category: '使用指南', tags: ['Mizuki', 'Blogging', 'Customization'], date: '2024-04-01' },
-  { title: 'Mermaid 图表嵌入', slug: 'mermaid-demo', excerpt: '在文章中使用 Mermaid 图表', category: '示例文章', tags: ['Markdown', 'Mermaid'], date: '2023-10-01' },
-  { title: '嵌入视频文章', slug: 'video-post', excerpt: '在博客文章中嵌入视频', category: '示例文章', tags: ['Example', 'Video'], date: '2022-08-01' },
-];
-
 const query = (Astro.url.searchParams.get('q') || '').toLowerCase().trim();
-const results = query ? allPosts.filter(p => p.title.toLowerCase().includes(query) || p.excerpt.toLowerCase().includes(query) || p.tags.some(t => t.toLowerCase().includes(query))) : [];
+
+let results: any[] = [];
+if (query) {
+  try {
+    const data = await getPosts({ q: query, limit: 20 });
+    results = data.list || [];
+  } catch (e) {
+    console.error('搜索失败:', e);
+  }
+}
 ---
 
 <Layout title="搜索">
@@ -29,13 +30,13 @@ const results = query ? allPosts.filter(p => p.title.toLowerCase().includes(quer
         <div>
           <p class="text-sm text-[var(--color-text-secondary)] mb-4">找到 {results.length} 条结果</p>
           <div class="space-y-4">
-            {results.map(post => (
+            {results.map((post: any) => (
               <a href={`/posts/${post.slug}`} class="block glass rounded-xl p-5 card-accent transition-all hover:-translate-y-1" style="box-shadow: var(--shadow-card)">
                 <h3 class="text-base font-semibold text-[var(--color-text)] mb-1" style="font-family: var(--font-heading)">{post.title}</h3>
-                <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-2">{post.excerpt}</p>
+                <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-2">{post.excerpt || post.description || ''}</p>
                 <div class="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
-                  <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)]">{post.category}</span>
-                  {post.tags.map(tag => <span>#{tag}</span>)}
+                  {post.category && <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)]">{post.category.name}</span>}
+                  {post.tags && post.tags.map((tag: any) => <span>#{tag.name}</span>)}
                 </div>
               </a>
             ))}

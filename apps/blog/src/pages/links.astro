@@ -1,33 +1,36 @@
 ---
+import { getLinks } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 
-const links = [
-  { name: 'Mizuki 主题', url: 'https://mizuki.mysqil.com', description: '一个简约&功能丰富的 Astro 博客主题' },
-  { name: 'GitHub', url: 'https://github.com', description: '全球最大的代码托管平台' },
-  { name: 'Bilibili', url: 'https://bilibili.com', description: '国内最大的二次元视频社区' },
-  { name: 'Astro 官网', url: 'https://astro.build', description: '现代静态站点生成器' },
-  { name: 'Tailwind CSS', url: 'https://tailwindcss.com', description: '原子化 CSS 框架' },
-  { name: 'Vercel', url: 'https://vercel.com', description: '前端部署平台' },
-];
+let links: any[] = [];
+try {
+  links = await getLinks();
+} catch (e) {
+  console.error('获取友链失败:', e);
+}
 ---
 
 <Layout title="友链">
   <div class="max-w-4xl">
     <h1 class="text-2xl sm:text-3xl font-bold mb-2 gradient-text" style="font-family: var(--font-heading)">🔗 友链</h1>
     <p class="text-[var(--color-text-secondary)] mb-8">一些有趣的朋友和有用的资源</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-      {links.map(link => (
-        <a href={link.url} target="_blank" rel="noopener" class="glass rounded-xl p-5 card-accent transition-all duration-300 hover:-translate-y-1 group" style="box-shadow: var(--shadow-card)">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white text-xl font-bold shrink-0" style="font-family:var(--font-title)">{link.name[0]}</div>
-            <div class="min-w-0 flex-1">
-              <h3 class="text-sm font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors truncate">{link.name}</h3>
-              <p class="text-xs text-[var(--color-text-secondary)] line-clamp-1 mt-0.5">{link.description}</p>
+    {links.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        {links.map((link: any) => (
+          <a href={link.url} target="_blank" rel="noopener" class="glass rounded-xl p-5 card-accent transition-all duration-300 hover:-translate-y-1 group" style="box-shadow: var(--shadow-card)">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white text-xl font-bold shrink-0" style="font-family:var(--font-title)">{link.name[0]}</div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-sm font-semibold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors truncate">{link.name}</h3>
+                <p class="text-xs text-[var(--color-text-secondary)] line-clamp-1 mt-0.5">{link.description || ''}</p>
+              </div>
             </div>
-          </div>
-        </a>
-      ))}
-    </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16 text-[var(--color-text-secondary)]"><div class="text-5xl mb-4">🔗</div><p>还没有友链</p></div>
+    )}
     <div class="glass rounded-xl p-6 text-center">
       <h3 class="text-lg font-semibold mb-2" style="font-family: var(--font-heading)">💌 申请友链</h3>
       <p class="text-sm text-[var(--color-text-secondary)] mb-4">想交换友链？请发送邮件至 example@boke.local</p>

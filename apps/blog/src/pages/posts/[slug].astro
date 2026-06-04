@@ -1,59 +1,58 @@
 ---
-import { getCollection } from 'astro:content';
+import { getPostBySlug } from '../../lib/data';
 import Layout from '../../layouts/Layout.astro';
 import CommentSection from '../../components/CommentSection.astro';
-
-export async function getStaticPaths() {
-  const posts = await getCollection('posts');
-  return posts.map(post => ({ params: { slug: post.data.slug } }));
-}
+import { marked } from 'marked';
 
 const { slug } = Astro.params;
-const posts = await getCollection('posts');
-const post = posts.find(p => p.data.slug === slug);
+let post: any = null;
+let contentHtml = '';
+
+try {
+  post = await getPostBySlug(slug!);
+  if (post?.content) {
+    contentHtml = await marked.parse(post.content);
+  }
+} catch (e) {
+  console.error('获取文章失败:', e);
+}
 
 if (!post) {
   return new Response(null, { status: 302, headers: { Location: '/posts/' } });
 }
 
-const { Content } = await post.render();
-const formattedDate = post.data.published.toLocaleDateString('zh-CN', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
+const formattedDate = new Date(post.createdAt).toLocaleDateString('zh-CN', {
+  year: 'numeric', month: 'long', day: 'numeric',
 });
 ---
 
-<Layout title={post.data.title} description={post.data.description} image={post.data.image} ogType="article">
+<Layout title={post.title} description={post.excerpt || post.description || ''} image={post.cover} ogType="article">
   <article class="max-w-3xl mx-auto">
-    {post.data.image && (
-      <img
-        src={post.data.image}
-        alt={post.data.title}
-        class="w-full h-64 sm:h-80 object-cover rounded-2xl mb-8"
-      />
+    {post.cover && (
+      <img src={post.cover} alt={post.title} class="w-full h-64 sm:h-80 object-cover rounded-2xl mb-8" />
     )}
     <h1 class="text-2xl sm:text-3xl font-bold mb-4" style="font-family: var(--font-heading)">
-      {post.data.title}
+      {post.title}
     </h1>
     <div class="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-secondary)] mb-8 pb-6 border-b border-[var(--color-border)]">
-      <time datetime={post.data.published.toISOString()}>{formattedDate}</time>
-      {post.data.category && (
+      <time datetime={post.createdAt}>{formattedDate}</time>
+      <span>{post.viewCount || 0} 阅读</span>
+      {post.category && (
         <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs">
-          {post.data.category}
+          {post.category.name}
         </span>
       )}
+      {post.tags && post.tags.length > 0 && post.tags.map((tag: any) => (
+        <span>#{tag.name}</span>
+      ))}
     </div>
     <div class="prose max-w-none">
-      <Content />
+      <Fragment set:html={contentHtml} />
     </div>
     <div class="flex flex-wrap gap-2 mt-10 pt-6 border-t border-[var(--color-border)]">
-      {post.data.tags.map((tag: string) => (
-        <a
-          href={`/search?q=${tag}`}
-          class="px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all"
-        >
-          #{tag}
+      {post.tags && post.tags.map((tag: any) => (
+        <a href={`/search?q=${tag.name}`} class="px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">
+          #{tag.name}
         </a>
       ))}
     </div>

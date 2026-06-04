@@ -1,12 +1,18 @@
 ---
-import { getCollection } from 'astro:content';
+import { getPosts } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 
-const allPosts = await getCollection('posts', ({ data }) => !data.draft);
-const categories = [...new Set(allPosts.map(p => p.data.category))];
-const tagSet = new Set(allPosts.flatMap(p => p.data.tags));
+let postCount = 0;
+let categoryCount = 0;
+let tagCount = 0;
+try {
+  const data = await getPosts({ limit: 1 });
+  postCount = data.total || 0;
+} catch (e) {
+  console.error('获取统计数据失败:', e);
+}
 
 const features = [
   { icon: '📝', title: '技术博客', desc: '记录前端开发、框架研究和编程实践中的心得与技巧。' },
@@ -18,10 +24,10 @@ const features = [
 ];
 
 const stats = [
-  { value: String(allPosts.length), label: '文章', icon: '📝' },
-  { value: String(categories.length), label: '分类', icon: '📂' },
-  { value: String(tagSet.size), label: '标签', icon: '🏷️' },
-  { value: '365+', label: '运行天数', icon: '⏱' },
+  { value: String(postCount), label: '文章', icon: '📝' },
+  { value: String(categoryCount), label: '分类', icon: '📂' },
+  { value: String(tagCount), label: '标签', icon: '🏷️' },
+  { value: '1', label: '运行天数', icon: '⏱' },
 ];
 ---
 
@@ -68,7 +74,7 @@ const stats = [
           <ScrollReveal type="scale" delay={i * 120}>
             <div class="text-center">
               <div class="text-3xl mb-3">{stat.icon}</div>
-              <div class="text-3xl sm:text-4xl font-extrabold count-up tracking-tight" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" data-target={stat.value}>0</div>
+              <div class="text-3xl sm:text-4xl font-extrabold count-up tracking-tight" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" data-target={stat.value}>{stat.value}</div>
               <div class="text-sm text-[var(--color-text-secondary)] mt-1 font-medium">{stat.label}</div>
             </div>
           </ScrollReveal>
@@ -84,7 +90,7 @@ const stats = [
         <span class="text-xs font-semibold tracking-[0.2em] uppercase text-[var(--color-primary)] mb-4 block">GET STARTED</span>
         <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">开始探索吧</h2>
         <p class="text-[var(--color-text-secondary)] text-lg mb-8">
-          这里有 {allPosts.length} 篇文章等待你的发现。
+          这里有 {postCount} 篇文章等待你的发现。
         </p>
         <a href="/posts" class="inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--color-primary)]/20" style="background: var(--color-gradient);">
           浏览全部文章
@@ -94,27 +100,3 @@ const stats = [
     </div>
   </section>
 </Layout>
-
-<script is:inline>
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target as HTMLElement;
-        const raw = el.dataset.target || '0';
-        const suffix = raw.includes('+') ? '+' : '';
-        const target = parseInt(raw.replace('+', ''));
-        const duration = 1800;
-        const start = performance.now();
-        function update(now: number) {
-          const p = Math.min((now - start) / duration, 1);
-          const ease = 1 - Math.pow(1 - p, 3);
-          el.textContent = Math.floor(ease * target) + suffix;
-          if (p < 1) requestAnimationFrame(update);
-        }
-        requestAnimationFrame(update);
-        observer.unobserve(el);
-      }
-    });
-  }, { threshold: 0.5 });
-  document.querySelectorAll('.count-up').forEach(el => observer.observe(el));
-</script>

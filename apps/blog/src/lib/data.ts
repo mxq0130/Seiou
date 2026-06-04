@@ -7,13 +7,16 @@
 import type { Post, Category, Tag, Album, Anime, Link, DiaryEntry, SiteStats, PaginatedResult } from './types';
 
 const isStatic = import.meta.env.ASTRO_MODE === 'static';
-const API_BASE = 'http://localhost:3000/api/v1';
+// 服务端 fetch API 用 127.0.0.1（容器/本地访问），客户端走代理 /api/v1
+const API_BASE = isStatic ? '' : (typeof window === 'undefined' ? 'http://127.0.0.1:3000/api/v1' : '/api/v1');
 
 // ===== 通用 fetch 封装 =====
 async function fetchAPI<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`);
+  const url = `${API_BASE}${path}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`API error: ${res.status} ${path}`);
   const json = await res.json();
+  if (json.code !== 0) throw new Error(json.message || 'API error');
   return json.data as T;
 }
 

@@ -1,36 +1,46 @@
 ---
+import { getAlbums } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 
-const albums = [
-  { name:'可爱的图片', coverUrl:'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop', description:'The world is vast, and you have to go explore it.', imageCount:22, encrypted:false, tags:['Kawai','Cute','Moe'], date:'2025-08-01' },
-  { name:'加密相册示例', coverUrl:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop', description:'这是一个加密相册示例，需要密码才能查看', imageCount:4, encrypted:true, tags:['加密','示例','私密'], date:'2025-05-22' },
-];
+let albums: any[] = [];
+try {
+  albums = await getAlbums();
+} catch (e) {
+  console.error('获取图集失败:', e);
+}
 ---
 
 <Layout title="图集">
   <div class="max-w-4xl">
     <h1 class="text-2xl sm:text-3xl font-bold mb-2 gradient-text" style="font-family:var(--font-heading)">📷 图集</h1>
     <p class="text-[var(--color-text-secondary)] mb-8">记录生活中的美好瞬间</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-      {albums.map(album => (
-        <a href={`/albums/${album.name}`} class="glass rounded-xl overflow-hidden card-accent group transition-all duration-300 hover:-translate-y-1" style="box-shadow:var(--shadow-card)">
-          <div class="relative aspect-[4/3] overflow-hidden">
-            <img src={album.coverUrl} alt={album.name} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-            {album.encrypted && <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white">🔒</div>}
-            <div class="absolute bottom-0 left-0 right-0 p-4">
-              <h3 class="text-white font-semibold text-lg drop-shadow">{album.name}</h3>
-              <p class="text-white/80 text-sm drop-shadow line-clamp-1">{album.description}</p>
+    {albums.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {albums.map((album: any) => (
+          <a href={`/albums/${album.name}`} class="glass rounded-xl overflow-hidden card-accent group transition-all duration-300 hover:-translate-y-1" style="box-shadow:var(--shadow-card)">
+            <div class="relative aspect-[4/3] overflow-hidden">
+              {album.coverUrl ? (
+                <img src={album.coverUrl} alt={album.name} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+              ) : (
+                <div class="w-full h-full bg-[var(--color-primary-light)] flex items-center justify-center text-4xl">📷</div>
+              )}
+              <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-4">
+                <h3 class="text-white font-semibold text-lg drop-shadow">{album.name}</h3>
+                <p class="text-white/80 text-sm drop-shadow line-clamp-1">{album.description || ''}</p>
+              </div>
             </div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
-              <span>📸 {album.imageCount} 张照片</span><span>{album.date}</span>
+            <div class="p-4">
+              <div class="flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
+                <span>📸 {album.imageCount || 0} 张照片</span>
+                <span>{new Date(album.createdAt).toLocaleDateString('zh-CN')}</span>
+              </div>
             </div>
-            <div class="flex flex-wrap gap-1.5 mt-2">{album.tags.map(t=><span class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)]">#{t}</span>)}</div>
-          </div>
-        </a>
-      ))}
-    </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16 text-[var(--color-text-secondary)]"><div class="text-5xl mb-4">📷</div><p>还没有图集</p></div>
+    )}
   </div>
 </Layout>

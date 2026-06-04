@@ -9,6 +9,8 @@ import diaryRoutes from './diary.js';
 import linksAdminRoutes from './links-admin.js';
 import aboutRoutes from './about.js';
 import statsRoutes from './stats.js';
+import categoriesRoutes from './categories.js';
+import tagsRoutes from './tags.js';
 
 const router = Router();
 
@@ -22,6 +24,8 @@ router.use('/diary', diaryRoutes);
 router.use('/links', linksAdminRoutes);
 router.use('/about', aboutRoutes);
 router.use('/stats', statsRoutes);
+router.use('/categories', categoriesRoutes);
+router.use('/tags', tagsRoutes);
 
 // 健康检查
 router.get('/health', (_req, res) => {

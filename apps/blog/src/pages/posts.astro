@@ -1,11 +1,22 @@
 ---
-import { getCollection } from 'astro:content';
+import { getPosts } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 
-const allPosts = await getCollection('posts', ({ data }) => !data.draft);
-const posts = allPosts.sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
-const categories = [...new Set(posts.map(p => p.data.category))];
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const cat = Astro.url.searchParams.get('category') || undefined;
+const tag = Astro.url.searchParams.get('tag') || undefined;
+const q = Astro.url.searchParams.get('q') || undefined;
+
+let data: { list: any[]; total: number; page: number; totalPages: number } = { list: [], total: 0, page: 1, totalPages: 0 };
+try {
+  data = await getPosts({ page, limit: 12, category: cat, tag, q });
+} catch (e) {
+  console.error('获取文章列表失败:', e);
+}
+
+const posts = data.list || [];
+const categories = [...new Set(posts.map(p => p.category?.name).filter(Boolean))] as string[];
 ---
 
 <Layout title="文章">
@@ -13,90 +24,67 @@ const categories = [...new Set(posts.map(p => p.data.category))];
     <span class="gradient-text">全部文章</span>
   </h1>
   <p class="text-[var(--color-text-secondary)] text-lg mb-10">
-    共 {posts.length} 篇文章 · 从技术教程到生活随笔，这里都有。
+    共 {data.total} 篇文章 · 从技术教程到生活随笔，这里都有。
   </p>
 
   <!-- 分类筛选 -->
-  <div class="flex flex-wrap gap-2 mb-10">
-    <button class="filter-btn active px-4 py-1.5 rounded-full text-sm font-medium bg-[var(--color-text)] text-[var(--color-bg)] transition-all" data-cat="all">全部</button>
-    {categories.map(cat => (
-      <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text)] hover:text-[var(--color-text)] transition-all" data-cat={cat}>{cat}</button>
-    ))}
-  </div>
+  {categories.length > 0 && (
+    <div class="flex flex-wrap gap-2 mb-10">
+      <a href="/posts/" class={`filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all ${!cat ? 'bg-[var(--color-text)] text-[var(--color-bg)]' : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text)] hover:text-[var(--color-text)]'}`}>全部</a>
+      {categories.map(c => (
+        <a href={`/posts/?category=${c}`} class={`filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all ${cat === c ? 'bg-[var(--color-text)] text-[var(--color-bg)]' : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text)] hover:text-[var(--color-text)]'}`}>{c}</a>
+      ))}
+    </div>
+  )}
 
   <!-- 瀑布流 -->
-  <div class="masonry">
-    {posts.map((post, i) => (
-      <div class="masonry-item" data-category={post.data.category}>
-        <ScrollReveal type="fade-up" delay={i * 80}>
-          <a href={`/posts/${post.data.slug}`} class="block group">
-            <article class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] transition-all duration-400 hover:-translate-y-1 hover:border-[var(--color-primary)]/30 hover:shadow-2xl hover:shadow-[var(--color-primary)]/5">
-              {post.data.image && (
-                <div class="overflow-hidden">
-                  <img
-                    src={post.data.image}
-                    alt={post.data.title}
-                    class="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    loading="lazy"
-                  />
-                </div>
-              )}
-              <div class="p-5 sm:p-6">
-                {post.data.pinned && (
-                  <span class="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] mb-2 tracking-wide uppercase">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span> 置顶
-                  </span>
+  {posts.length > 0 ? (
+    <div class="masonry">
+      {posts.map((post: any, i: number) => (
+        <div class="masonry-item" data-category={post.category?.name}>
+          <ScrollReveal type="fade-up" delay={i * 80}>
+            <a href={`/posts/${post.slug}`} class="block group">
+              <article class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] transition-all duration-400 hover:-translate-y-1 hover:border-[var(--color-primary)]/30 hover:shadow-2xl hover:shadow-[var(--color-primary)]/5">
+                {post.cover && (
+                  <div class="overflow-hidden">
+                    <img src={post.cover} alt={post.title} class="w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" loading="lazy" />
+                  </div>
                 )}
-                <h3 class="text-lg font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-3 mb-2 leading-snug tracking-tight">
-                  {post.data.title}
-                </h3>
-                <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3 leading-relaxed">
-                  {post.data.description}
-                </p>
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-secondary)]">
-                  <time datetime={post.data.published.toISOString()}>
-                    {post.data.published.toLocaleDateString('zh-CN', { year:'numeric', month:'short', day:'numeric' })}
-                  </time>
-                  <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs font-medium">
-                    {post.data.category}
-                  </span>
+                <div class="p-5 sm:p-6">
+                  <h3 class="text-lg font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-3 mb-2 leading-snug tracking-tight">
+                    {post.title}
+                  </h3>
+                  <p class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-3 leading-relaxed">
+                    {post.excerpt || post.description || ''}
+                  </p>
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-secondary)]">
+                    <time datetime={post.createdAt}>{new Date(post.createdAt).toLocaleDateString('zh-CN', { year:'numeric', month:'short', day:'numeric' })}</time>
+                    {post.category && (
+                      <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs font-medium">
+                        {post.category.name}
+                      </span>
+                    )}
+                    <span>{post.viewCount || 0} 阅读</span>
+                  </div>
                 </div>
-              </div>
-            </article>
-          </a>
-        </ScrollReveal>
-      </div>
-    ))}
-  </div>
+              </article>
+            </a>
+          </ScrollReveal>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div class="text-center py-20 text-[var(--color-text-secondary)]">
+      <div class="text-5xl mb-4">📝</div>
+      <p>暂无文章</p>
+      <p class="text-sm mt-2">去后台 <a href="/admin/" class="text-[var(--color-primary)]">发布第一篇文章</a> 吧</p>
+    </div>
+  )}
 </Layout>
 
 <style>
-  .masonry {
-    column-count: 3;
-    column-gap: 1.5rem;
-  }
+  .masonry { column-count: 3; column-gap: 1.5rem; }
   @media (max-width: 1024px) { .masonry { column-count: 2; } }
   @media (max-width: 640px)  { .masonry { column-count: 1; } }
-  .masonry-item {
-    break-inside: avoid;
-    margin-bottom: 1.5rem;
-  }
-  .filter-btn.active {
-    background: var(--color-text) !important;
-    color: var(--color-bg) !important;
-    border-color: transparent !important;
-  }
+  .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
 </style>
-
-<script is:inline>
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const cat = (btn as HTMLElement).dataset.cat;
-      document.querySelectorAll('.masonry-item').forEach((item: HTMLElement) => {
-        item.style.display = (cat === 'all' || item.dataset.category === cat) ? '' : 'none';
-      });
-    });
-  });
-</script>

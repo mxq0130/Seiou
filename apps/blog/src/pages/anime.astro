@@ -1,17 +1,17 @@
 ---
+import { getAnimeList } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 import AnimeCard from '../components/AnimeCard.astro';
 
 const statusLabels: Record<string,string> = { all:'全部', watching:'在看', completed:'已看', planning:'想看', dropped:'弃番' };
-const animeList = [
-  { title:'Lycoris Recoil', progress:12, total:12, rating:9.8, status:'completed' as const, note:"Girl's gunfight", year:2022, studio:'A-1 Pictures', genre:'Action · Slice of life' },
-  { title:'弱虫ペダル', progress:8, total:12, rating:9.5, status:'watching' as const, note:"Girl's daily life", year:2015, studio:'Nexus', genre:'Daily life · Healing' },
-  { title:'恋する小惑星', progress:5, total:12, rating:9.2, status:'watching' as const, note:'Meeting girls among the stars', year:2020, studio:'Doga Kobo', genre:'Romance · Healing' },
-  { title:'ご注文はうさぎですか？', progress:0, total:12, rating:9.0, status:'planning' as const, note:"A group of girls' warm daily life", year:2014, studio:'White Fox', genre:'Daily life · Healing' },
-  { title:'魔法少女の秘密', progress:8, total:12, rating:9.0, status:'watching' as const, note:'Muli, Muli!', year:2024, studio:'C2C', genre:'Daily life · Healing · Magic' },
-];
 const filter = (Astro.url.searchParams.get('status') || 'all') as string;
-const filtered = filter==='all' ? animeList : animeList.filter(a=>a.status===filter);
+
+let animeList: any[] = [];
+try {
+  animeList = await getAnimeList(filter !== 'all' ? filter : undefined);
+} catch (e) {
+  console.error('获取追番列表失败:', e);
+}
 ---
 
 <Layout title="追番">
@@ -23,6 +23,10 @@ const filtered = filter==='all' ? animeList : animeList.filter(a=>a.status===fil
         <a href={`/anime${k==='all'?'':`?status=${k}`}`} class={`px-4 py-1.5 rounded-full text-sm transition-all ${filter===k?'bg-[var(--color-primary)] text-white':'bg-[var(--color-primary-light)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white'}`}>{v}</a>
       ))}
     </div>
-    <div class="space-y-4">{filtered.map(a=><AnimeCard {...a} />)}</div>
+    {animeList.length > 0 ? (
+      <div class="space-y-4">{animeList.map((a: any)=><AnimeCard {...a} />)}</div>
+    ) : (
+      <div class="text-center py-16 text-[var(--color-text-secondary)]"><div class="text-5xl mb-4">🎬</div><p>还没有追番记录</p></div>
+    )}
   </div>
 </Layout>

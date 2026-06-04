@@ -1,30 +1,62 @@
 import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { success, fail } from '../utils/response.js';
 
+const prisma = new PrismaClient();
 const router = Router();
 
-let links = [
-  { id:1, name:'Mizuki 主题', url:'https://mizuki.mysqil.com', avatar:'', description:'Astro博客主题', approved:true, createdAt:'2025-01-01' },
-  { id:2, name:'GitHub', url:'https://github.com', avatar:'', description:'代码托管', approved:true, createdAt:'2025-01-01' },
-  { id:3, name:'Bilibili', url:'https://bilibili.com', avatar:'', description:'视频社区', approved:true, createdAt:'2025-01-01' },
-];
+// 公开 GET - 只返回已审核的友链
+router.get('/', async (_req, res) => {
+  try {
+    const list = await prisma.link.findMany({
+      where: { approved: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return success(res, list);
+  } catch (err: any) {
+    return fail(res, err.message, 500);
+  }
+});
 
-router.get('/', (_req, res) => success(res, links));
-router.post('/', (req, res) => {
-  const { name, url, avatar, description } = req.body;
-  const link = { id:Date.now(), name, url, avatar:avatar||'', description:description||'', approved:true, createdAt:new Date().toISOString() };
-  links.unshift(link);
-  return success(res, link, '添加成功');
+router.post('/', async (req, res) => {
+  try {
+    const { name, url, avatar, description } = req.body;
+    const link = await prisma.link.create({
+      data: {
+        name,
+        url,
+        avatar: avatar || '',
+        description: description || '',
+        approved: true,
+      },
+    });
+    return success(res, link, '添加成功');
+  } catch (err: any) {
+    return fail(res, err.message, 500);
+  }
 });
-router.put('/:id', (req, res) => {
-  const idx = links.findIndex(l => l.id === parseInt(req.params.id));
-  if (idx === -1) return fail(res, '不存在', 404);
-  links[idx] = { ...links[idx], ...req.body };
-  return success(res, links[idx], '更新成功');
+
+router.put('/:id', async (req, res) => {
+  try {
+    const link = await prisma.link.update({
+      where: { id: parseInt(req.params.id) },
+      data: req.body,
+    });
+    return success(res, link, '更新成功');
+  } catch (err: any) {
+    if (err.code === 'P2025') return fail(res, '不存在', 404);
+    return fail(res, err.message, 500);
+  }
 });
-router.delete('/:id', (req, res) => {
-  links = links.filter(l => l.id !== parseInt(req.params.id));
-  return success(res, null, '删除成功');
+
+router.delete('/:id', async (req, res) => {
+  try {
+    await prisma.link.delete({ where: { id: parseInt(req.params.id) } });
+    return success(res, null, '删除成功');
+  } catch (err: any) {
+    if (err.code === 'P2025') return fail(res, '不存在', 404);
+    return fail(res, err.message, 500);
+  }
 });
 
 export default router;

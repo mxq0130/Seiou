@@ -1,29 +1,59 @@
 import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { success, fail } from '../utils/response.js';
 
+const prisma = new PrismaClient();
 const router = Router();
 
-let albums = [
-  { id:1, name:'可爱的图片', coverUrl:'', description:'探索世界', imageCount:22, encrypted:false, tags:['Kawai'], createdAt:new Date().toISOString() },
-  { id:2, name:'加密相册', coverUrl:'', description:'需要密码', imageCount:4, encrypted:true, tags:['私密'], createdAt:new Date().toISOString() },
-];
+router.get('/', async (_req, res) => {
+  try {
+    const list = await prisma.album.findMany({
+      orderBy: { sortOrder: 'asc' },
+      include: { _count: { select: { images: true } } },
+    });
+    const result = list.map(a => ({
+      ...a,
+      imageCount: a._count.images,
+    }));
+    return success(res, result);
+  } catch (err: any) {
+    return fail(res, err.message, 500);
+  }
+});
 
-router.get('/', (_req, res) => success(res, albums));
-router.post('/', (req, res) => {
-  const { name, description, encrypted, tags } = req.body;
-  const album = { id:Date.now(), name, coverUrl:'', description, imageCount:0, encrypted:!!encrypted, tags:tags||[], createdAt:new Date().toISOString() };
-  albums.unshift(album);
-  return success(res, album, '创建成功');
+router.post('/', async (req, res) => {
+  try {
+    const { name, coverUrl, description } = req.body;
+    const album = await prisma.album.create({
+      data: { name, coverUrl: coverUrl || '', description: description || '' },
+    });
+    return success(res, album, '创建成功');
+  } catch (err: any) {
+    return fail(res, err.message, 500);
+  }
 });
-router.put('/:id', (req, res) => {
-  const idx = albums.findIndex(a => a.id === parseInt(req.params.id));
-  if (idx === -1) return fail(res, '不存在', 404);
-  albums[idx] = { ...albums[idx], ...req.body };
-  return success(res, albums[idx], '更新成功');
+
+router.put('/:id', async (req, res) => {
+  try {
+    const album = await prisma.album.update({
+      where: { id: parseInt(req.params.id) },
+      data: req.body,
+    });
+    return success(res, album, '更新成功');
+  } catch (err: any) {
+    if (err.code === 'P2025') return fail(res, '不存在', 404);
+    return fail(res, err.message, 500);
+  }
 });
-router.delete('/:id', (req, res) => {
-  albums = albums.filter(a => a.id !== parseInt(req.params.id));
-  return success(res, null, '删除成功');
+
+router.delete('/:id', async (req, res) => {
+  try {
+    await prisma.album.delete({ where: { id: parseInt(req.params.id) } });
+    return success(res, null, '删除成功');
+  } catch (err: any) {
+    if (err.code === 'P2025') return fail(res, '不存在', 404);
+    return fail(res, err.message, 500);
+  }
 });
 
 export default router;

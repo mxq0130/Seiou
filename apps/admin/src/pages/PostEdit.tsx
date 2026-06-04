@@ -3,22 +3,36 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Card, Form, Input, Button, Select, message, Space, Tabs } from 'antd';
 import { SaveOutlined, SendOutlined } from '@ant-design/icons';
 import { getPost, createPost, updatePost } from '../api/posts';
+import api from '../api/client';
 
 export default function PostEditPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState('');
+  const [categories, setCategories] = useState<{ value: number; label: string }[]>([]);
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
 
   useEffect(() => {
+    // 加载分类列表
+    api.get('/categories').then((res: any) => {
+      setCategories((res.data || []).map((c: any) => ({ value: c.id, label: c.name })));
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (isEdit) {
       getPost(String(id)).then((res: any) => {
-        const p = res.data.post;
-        form.setFieldsValue(p);
-        setContent(p.content);
-      }).catch(() => message.error('加载文章失败'));
+        const p = res.data;
+        form.setFieldsValue({
+          title: p.title,
+          slug: p.slug,
+          categoryId: p.categoryId,
+          excerpt: p.excerpt,
+        });
+        setContent(p.content || '');
+      }).catch((err: any) => message.error('加载文章失败: ' + (err.message || '未知错误')));
     }
   }, [id]);
 
@@ -46,19 +60,23 @@ export default function PostEditPage() {
     <div>
       <h2 style={{ marginBottom: 16 }}>{isEdit ? '编辑文章' : '新建文章'}</h2>
       <Card>
-        <Form form={form} layout="vertical" initialValues={{ status: 'DRAFT' }}>
+        <Form form={form} layout="vertical">
           <Form.Item name="title" label="标题" rules={[{ required: true, message: '请输入标题' }]}>
             <Input placeholder="文章标题" size="large" />
           </Form.Item>
-          <Form.Item name="slug" label="URL 标识" rules={[{ required: true, message: '请输入 URL 标识' }]}>
-            <Input placeholder="article-slug" />
+          <Form.Item
+            name="slug"
+            label="URL 标识"
+            rules={[{ required: true, message: '请输入 URL 标识' }]}
+            extra="文章的唯一英文标识，如 my-first-post。发布后请勿修改，否则链接会失效。"
+          >
+            <Input placeholder="例如: my-first-post" />
           </Form.Item>
           <Form.Item name="categoryId" label="分类">
-            <Select placeholder="选择分类" allowClear options={[
-              { value: 1, label: '技术' },
-              { value: 2, label: '二次元' },
-              { value: 3, label: '生活' },
-            ]} />
+            <Select placeholder="选择分类" allowClear options={categories} />
+          </Form.Item>
+          <Form.Item name="excerpt" label="摘要" extra="文章简述，会显示在列表卡片中">
+            <Input.TextArea placeholder="可选，留空则自动截取正文开头" rows={2} />
           </Form.Item>
           <Form.Item label="正文" required>
             <Tabs
