@@ -9,6 +9,7 @@ export default function AnimePage() {
   const [editing, setEditing] = useState<any>(null);
   const [syncing, setSyncing] = useState(false);
   const [biliUid, setBiliUid] = useState('');
+  const [biliCookie, setBiliCookie] = useState('');
   const [form] = Form.useForm();
 
   const fetch = () => api.get('/anime').then((r: any) => setData(r.data || []));
@@ -18,7 +19,7 @@ export default function AnimePage() {
     if (!biliUid) return message.warning('请输入 B站 UID');
     setSyncing(true);
     try {
-      const res: any = await api.post('/anime/sync', { uid: biliUid });
+      const res: any = await api.post('/anime/sync', { uid: biliUid, cookie: biliCookie || undefined });
       message.success(res.message);
       fetch();
     } catch (e: any) { message.error(e.message || '同步失败'); }
@@ -57,8 +58,10 @@ export default function AnimePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ whiteSpace: 'nowrap' }}>B站 UID:</span>
           <Input placeholder="输入 B站用户 UID" value={biliUid} onChange={e => setBiliUid(e.target.value)} style={{ width: 200 }} />
+          <span style={{ whiteSpace: 'nowrap' }}>Cookie:</span>
+          <Input.Password placeholder="粘贴 B站 Cookie (SESSDATA)" value={biliCookie} onChange={e => setBiliCookie(e.target.value)} style={{ width: 300 }} />
           <Button type="primary" icon={<SyncOutlined />} loading={syncing} onClick={handleSync}>同步追番列表</Button>
-          <span style={{ fontSize: 12, color: '#999' }}>B站个人主页 URL 中的数字</span>
+          <span style={{ fontSize: 12, color: '#999' }}>UID 在 B站个人主页 URL，Cookie 按 F12→Application→Cookies→SESSDATA</span>
         </div>
       </Card>
       <Button type="primary" icon={<PlusOutlined />} onClick={() => openEdit()} style={{ marginBottom: 16 }}>添加番剧</Button>

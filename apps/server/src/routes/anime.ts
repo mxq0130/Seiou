@@ -75,21 +75,22 @@ router.delete('/:id', async (req, res) => {
 // ===== B站追番同步 =====
 router.post('/sync', async (req, res) => {
   try {
-    const { uid } = req.body;
+    const { uid, cookie } = req.body;
     if (!uid) return fail(res, '请提供 B站 UID');
 
     // 使用 Wbi 签名调用 B站 API
     const url = await signUrl('/x/space/bangumi/follow/list', {
       vmid: String(uid), type: '1', ps: '50',
     });
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Referer': `https://space.bilibili.com/${uid}/bangumi`,
-        'Accept': 'application/json',
-        'Accept-Language': 'zh-CN',
-      },
-    });
+    const headers: Record<string, string> = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'Referer': `https://space.bilibili.com/${uid}/bangumi`,
+      'Accept': 'application/json',
+      'Accept-Language': 'zh-CN',
+    };
+    if (cookie) headers['Cookie'] = cookie;
+
+    const response = await fetch(url, { headers });
     const json: any = await response.json();
 
     if (json.code !== 0) {
