@@ -33,6 +33,16 @@ export default function UserListPage() {
     }
   };
 
+  const handleChangeRole = async (id: number, role: string) => {
+    try {
+      await api.put(`/users/${id}`, { role: role === 'ADMIN' ? 'USER' : 'ADMIN' });
+      message.success(role === 'ADMIN' ? '已取消管理员' : '已设为管理员');
+      fetchUsers();
+    } catch {
+      message.error('操作失败');
+    }
+  };
+
   const columns = [
     { title: 'ID', dataIndex: 'id', width: 60 },
     { title: '用户名', dataIndex: 'username' },
@@ -50,12 +60,17 @@ export default function UserListPage() {
       render: (t: string) => new Date(t).toLocaleString('zh-CN'),
     },
     {
-      title: '操作', width: 120,
+      title: '操作', width: 200,
       render: (_: any, r: any) => (
         <Space>
           <Popconfirm title="确定操作？" onConfirm={() => handleToggle(r.id, r.status)}>
             <Button size="small" danger={r.status === 'ACTIVE'}>
               {r.status === 'ACTIVE' ? '禁用' : '启用'}
+            </Button>
+          </Popconfirm>
+          <Popconfirm title={r.role === 'ADMIN' ? '取消管理员权限？' : '授予管理员权限？'} onConfirm={() => handleChangeRole(r.id, r.role)}>
+            <Button size="small" type={r.role === 'ADMIN' ? 'default' : 'primary'}>
+              {r.role === 'ADMIN' ? '取消管理员' : '设为管理员'}
             </Button>
           </Popconfirm>
         </Space>

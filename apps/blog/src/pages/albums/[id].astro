@@ -1,0 +1,44 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const { id } = Astro.params;
+let album: any = null;
+let images: any[] = [];
+try {
+  const res = await fetch(`http://127.0.0.1:3000/api/v1/albums/${id}`);
+  const json = await res.json();
+  if (json.code === 0) {
+    album = json.data;
+    images = album.images || [];
+  }
+} catch (e) { console.error('获取相册失败:', e); }
+
+if (!album) {
+  return new Response(null, { status: 302, headers: { Location: '/albums/' } });
+}
+---
+
+<Layout title={album.name}>
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-2 gradient-text" style="font-family:var(--font-heading)">📷 {album.name}</h1>
+    <p class="text-[var(--color-text-secondary)] mb-2">{album.description || ''}</p>
+    <p class="text-sm text-[var(--color-text-secondary)] mb-8">{images.length} 张照片</p>
+    {images.length > 0 ? (
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {images.map((img: any) => (
+          <a href={img.url} target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]/50 transition-all hover:-translate-y-1">
+            <img src={img.url} alt="" class="w-full aspect-square object-cover" loading="lazy" />
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16 text-[var(--color-text-secondary)]">
+        <div class="text-5xl mb-4">📷</div>
+        <p>相册还是空的</p>
+      </div>
+    )}
+    <div class="mt-8 text-center">
+      <a href="/albums" class="text-sm text-[var(--color-primary)] hover:underline">← 返回图集列表</a>
+    </div>
+  </div>
+</Layout>

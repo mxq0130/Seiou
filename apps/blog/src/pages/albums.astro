@@ -3,11 +3,7 @@ import { getAlbums } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 
 let albums: any[] = [];
-try {
-  albums = await getAlbums();
-} catch (e) {
-  console.error('获取图集失败:', e);
-}
+try { albums = await getAlbums(); } catch (e) {}
 ---
 
 <Layout title="图集">
@@ -17,7 +13,7 @@ try {
     {albums.length > 0 ? (
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {albums.map((album: any) => (
-          <a href={`/albums/${album.name}`} class="glass rounded-xl overflow-hidden card-accent group transition-all duration-300 hover:-translate-y-1" style="box-shadow:var(--shadow-card)">
+          <a href={`/albums/${album.id}`} class="glass rounded-xl overflow-hidden card-accent group transition-all duration-300 hover:-translate-y-1" style="box-shadow:var(--shadow-card)">
             <div class="relative aspect-[4/3] overflow-hidden">
               {album.coverUrl ? (
                 <img src={album.coverUrl} alt={album.name} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
