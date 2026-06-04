@@ -1,43 +1,64 @@
 ---
+import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
-import TableOfContents from '../../components/TableOfContents.astro';
 import CommentSection from '../../components/CommentSection.astro';
 
-export function getStaticPaths() {
-  const slugs = ['markdown-guide','astro-intro','tailwind-v4','react-19-rsc','anime-2025','build-blog-guide'];
-  return slugs.map(slug => ({ params: { slug } }));
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map(post => ({ params: { slug: post.data.slug } }));
 }
 
-const postMap = {
-  'markdown-guide': { title: 'Markdown 写作完全指南', content: '## 什么是 Markdown？\nMarkdown 是一种轻量级标记语言。', excerpt: '掌握 Markdown 的所有语法', cover: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&h=600&fit=crop', category: '示例文章', tags: ['Markdown','Blogging'], date: '2025-01-20', readingTime: 8 },
-  'astro-intro': { title: 'Astro 静态站点生成器入门', content: '## 为什么选择 Astro？\nAstro 是构建内容驱动网站的最佳选择。', excerpt: 'Astro 是一个现代化的静态站点生成器。', cover: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&h=600&fit=crop', category: '技术分享', tags: ['Astro','Frontend'], date: '2025-03-10', readingTime: 5 },
-  'tailwind-v4': { title: 'Tailwind CSS v4 新特性一览', content: '## Tailwind CSS v4\n带来全新的配置方式。', excerpt: 'Tailwind CSS v4 带来全新配置方式。', cover: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop', category: '技术分享', tags: ['Tailwind','CSS'], date: '2025-04-01', readingTime: 4 },
-  'react-19-rsc': { title: 'React 19 服务器组件深度解析', content: '## React Server Components\nReact 19 改变了数据获取方式。', excerpt: 'React 19 引入服务器组件(RSC)。', cover: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=1200&h=600&fit=crop', category: '技术分享', tags: ['React','RSC'], date: '2025-02-15', readingTime: 6 },
-  'anime-2025': { title: '2025年最值得追的10部新番', content: '## 2025 年新番推荐\n今年是动画大年。', excerpt: '整理了2025年最值得期待的10部新番。', cover: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&h=600&fit=crop', category: '示例文章', tags: ['Anime','推荐'], date: '2025-05-20', readingTime: 3 },
-  'build-blog-guide': { title: '从零搭建个人博客的完整指南', content: '## 为什么要自己搭建博客？\n拥有独立的博客意味着完全的控制权。', excerpt: '一步步教你从零搭建个人博客。', cover: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1200&h=600&fit=crop', category: '使用指南', tags: ['Blogging','Guide'], date: '2025-06-01', readingTime: 7 },
-};
-
 const { slug } = Astro.params;
-const post = postMap[slug as string] || postMap['markdown-guide'];
+const posts = await getCollection('posts');
+const post = posts.find(p => p.data.slug === slug);
 
-const formattedDate = new Date(post.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+if (!post) {
+  return new Response(null, { status: 302, headers: { Location: '/posts/' } });
+}
+
+const { Content } = await post.render();
+const formattedDate = post.data.published.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
 ---
 
-<Layout title={post.title} description={post.excerpt} image={post.cover} ogType="article">
+<Layout title={post.data.title} description={post.data.description} image={post.data.image} ogType="article">
   <article class="max-w-3xl mx-auto">
-    {post.cover && <img src={post.cover} alt={post.title} class="w-full h-64 sm:h-80 object-cover rounded-2xl mb-8" />}
-    <h1 class="text-2xl sm:text-3xl font-bold mb-4" style="font-family: var(--font-heading)">{post.title}</h1>
+    {post.data.image && (
+      <img
+        src={post.data.image}
+        alt={post.data.title}
+        class="w-full h-64 sm:h-80 object-cover rounded-2xl mb-8"
+      />
+    )}
+    <h1 class="text-2xl sm:text-3xl font-bold mb-4" style="font-family: var(--font-heading)">
+      {post.data.title}
+    </h1>
     <div class="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-secondary)] mb-8 pb-6 border-b border-[var(--color-border)]">
-      <time datetime={post.date}>{formattedDate}</time>
-      <span>{post.readingTime} 分钟阅读</span>
-      {post.category && <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs">{post.category}</span>}
+      <time datetime={post.data.published.toISOString()}>{formattedDate}</time>
+      {post.data.category && (
+        <span class="px-2 py-0.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] text-xs">
+          {post.data.category}
+        </span>
+      )}
     </div>
     <div class="prose max-w-none">
-      {post.content.split('\n').map(line => <p>{line}</p>)}
+      <Content />
     </div>
     <div class="flex flex-wrap gap-2 mt-10 pt-6 border-t border-[var(--color-border)]">
-      {post.tags.map(tag => <a href={`/search?q=${tag}`} class="px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">#{tag}</a>)}
+      {post.data.tags.map((tag: string) => (
+        <a
+          href={`/search?q=${tag}`}
+          class="px-3 py-1 rounded-full bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all"
+        >
+          #{tag}
+        </a>
+      ))}
     </div>
-    <div class="mt-12 pt-6 border-t border-[var(--color-border)]"><CommentSection /></div>
+    <div class="mt-12 pt-6 border-t border-[var(--color-border)]">
+      <CommentSection />
+    </div>
   </article>
 </Layout>
