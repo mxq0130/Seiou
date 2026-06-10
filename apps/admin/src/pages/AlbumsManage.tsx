@@ -73,7 +73,7 @@ export default function AlbumsPage() {
         <Form form={form} layout="vertical">
           <Form.Item name="name" label="名称" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="description" label="描述"><Input.TextArea rows={2} /></Form.Item>
-          <Form.Item name="coverUrl" label="封面 URL"><Input placeholder="图片链接" /></Form.Item>
+          <Form.Item name="coverUrl" label="封面 URL"><div style={{ display: 'flex', gap: 8 }}><Input placeholder="图片链接" style={{ flex: 1 }} /><Upload showUploadList={false} customRequest={({ file, onSuccess }: any) => {const fd = new FormData(); fd.append('file', file); api.post('/images/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' }, transformRequest: [(d: any) => d] }).then((r: any) => {if (r.code === 0) { form.setFieldValue('coverUrl', r.data.url); message.success('上传成功'); onSuccess?.(r.data); }}).catch(() => message.error('上传失败'));}}><Button icon={<UploadOutlined />}>上传封面</Button></Upload></div></Form.Item>
         </Form>
       </Modal>
 

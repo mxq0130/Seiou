@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Card, Form, Input, Button, Select, message, Space, Switch } from 'antd';
-import { SaveOutlined, SendOutlined } from '@ant-design/icons';
+import { Card, Form, Input, Button, Select, message, Space, Switch, Upload } from 'antd';
+import { SaveOutlined, SendOutlined, UploadOutlined } from '@ant-design/icons';
 import { getPost, createPost, updatePost } from '../api/posts';
 import api from '../api/client';
 
@@ -71,8 +71,18 @@ export default function PostEditPage() {
           <Form.Item name="categoryId" label="分类">
             <Select placeholder="选择分类" allowClear options={categories} />
           </Form.Item>
-          <Form.Item name="cover" label="封面图" extra="填入图片 URL，或使用 Unsplash 免费图源">
-            <Input placeholder="https://images.unsplash.com/photo-xxx?w=800&h=800&fit=crop" />
+          <Form.Item name="cover" label="封面图" extra="填入图片 URL，或点击上传按钮选择本地图片">
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Input placeholder="https://images.unsplash.com/photo-xxx?w=800&h=800&fit=crop" style={{ flex: 1 }} />
+              <Upload showUploadList={false} customRequest={({ file, onSuccess }: any) => {
+                const fd = new FormData(); fd.append('file', file);
+                api.post('/images/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' }, transformRequest: [(d: any) => d] }).then((r: any) => {
+                  if (r.code === 0) { form.setFieldValue('cover', r.data.url); message.success('上传成功'); onSuccess?.(r.data); }
+                }).catch(() => message.error('上传失败'));
+              }}>
+                <Button icon={<UploadOutlined />}>上传封面</Button>
+              </Upload>
+            </div>
           </Form.Item>
           <Form.Item name="excerpt" label="摘要" extra="文章简述，会显示在列表卡片中">
             <Input.TextArea placeholder="可选，留空则自动截取正文开头" rows={2} />

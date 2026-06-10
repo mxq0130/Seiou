@@ -49,7 +49,8 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     const { mockPosts } = await import('./mock');
     return mockPosts.find(p => p.slug === slug && p.status === 'published') || null;
   }
-  return fetchAPI<Post>(`/posts/${slug}`);
+  const data = await fetchAPI<{ post: Post }>(`/posts/${slug}`);
+  return data?.post || null;
 }
 
 // ===== 分类标签 =====
