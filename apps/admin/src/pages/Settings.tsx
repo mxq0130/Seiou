@@ -5,26 +5,6 @@ import {
 import { SaveOutlined } from '@ant-design/icons';
 import api from '../api/client';
 
-interface SiteSettings {
-  title: string;
-  subtitle: string;
-  description: string;
-  keywords: string[];
-  author: string;
-  authorBio: string;
-  bannerImages: string[];
-  announcement: string;
-  footer: string;
-  socialLinks: {
-    github: string;
-    bilibili: string;
-    email: string;
-  };
-  musicPlaylist: { title: string; artist: string }[];
-  sidebarWidgets: Record<string, boolean>;
-  homepageSections: Record<string, boolean>;
-}
-
 export default function SettingsPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -33,19 +13,38 @@ export default function SettingsPage() {
   useEffect(() => {
     api.get('/settings')
       .then((res: any) => {
-        form.setFieldsValue(res.data);
+        const s = res.data;
+        // 数组字段转字符串，适配表单控件
+        if (Array.isArray(s.keywords)) s.keywords = s.keywords.join(', ');
+        if (Array.isArray(s.bannerImages)) s.bannerImages = s.bannerImages.join('\n');
+        if (Array.isArray(s.musicPlaylist)) s.musicPlaylist = s.musicPlaylist.map((m: any) => `${m.title} - ${m.artist}`).join('\n');
+        form.setFieldsValue(s);
       })
       .catch(() => message.warning('无法加载设置，使用默认值'))
       .finally(() => setFetching(false));
   }, [form]);
 
-  const handleSave = async (values: SiteSettings) => {
+  const handleSave = async (values: any) => {
     setLoading(true);
     try {
-      await api.put('/settings', values);
+      // 字符串字段转数组再发送
+      const payload = { ...values };
+      if (typeof payload.keywords === 'string') {
+        payload.keywords = payload.keywords.split(/[,，]/).map((s: string) => s.trim()).filter(Boolean);
+      }
+      if (typeof payload.bannerImages === 'string') {
+        payload.bannerImages = payload.bannerImages.split('\n').map((s: string) => s.trim()).filter(Boolean);
+      }
+      if (typeof payload.musicPlaylist === 'string') {
+        payload.musicPlaylist = payload.musicPlaylist.split('\n').map((line: string) => {
+          const [title, artist] = line.split('-').map(s => s.trim());
+          return { title: title || '', artist: artist || '' };
+        }).filter((m: any) => m.title);
+      }
+      await api.put('/settings', payload);
       message.success('站点设置已保存 ✅');
-    } catch {
-      message.error('保存失败，请重试');
+    } catch (e: any) {
+      message.error(e.message || '保存失败');
     } finally {
       setLoading(false);
     }
@@ -224,6 +223,14 @@ export default function SettingsPage() {
               <Switch />
             </Form.Item>
           </Space>
+        </Card>
+
+        {/* ===== 音乐播放列表 ===== */}
+        <Card title="🎵 音乐播放列表" style={{ marginBottom: 16 }}>
+          <p style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>每行一首，格式：歌名 - 歌手</p>
+          <Form.Item name="musicPlaylist">
+            <Input.TextArea rows={4} placeholder={`secret base ~君がくれたもの~ - あの花\n打上花火 - DAOKO × 米津玄師`} />
+          </Form.Item>
         </Card>
 
         {/* ===== 页脚 ===== */}

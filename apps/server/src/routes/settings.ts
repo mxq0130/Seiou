@@ -1,17 +1,20 @@
 /**
- * 站点设置路由 — 提供公开和管理的站点配置接口
+ * 站点设置路由 — 持久化到数据库 SiteSetting 表
  *
- * GET  /api/v1/settings       → 公开设置（任何人可读）
+ * GET  /api/v1/settings       → 公开设置
  * PUT  /api/v1/settings       → 更新设置（需管理员）
  */
 import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { success, fail } from '../utils/response.js';
 import { requireAdmin } from '../middleware/auth.js';
 
+const prisma = new PrismaClient();
 const router = Router();
 
-// 默认站点配置（生产环境从数据库读取）
-let siteSettings = {
+const SETTINGS_KEY = 'site_config';
+
+const defaultSettings = {
   title: '🌸 小破站',
   subtitle: 'わたしの部屋',
   description: '二次元风格个人博客 - 记录生活与技术',
@@ -22,7 +25,7 @@ let siteSettings = {
     'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=600&fit=crop',
     'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=600&fit=crop',
   ],
-  announcement: 'ブログへようこそ！これはサンプルの告知です 🎉',
+  announcement: '',
   footer: '© 2025 まつざか ゆき. All Rights Reserved.',
   socialLinks: {
     github: 'https://github.com',
@@ -31,56 +34,68 @@ let siteSettings = {
   },
   musicPlaylist: [
     { title: 'secret base ~君がくれたもの~', artist: 'あの花' },
-    { title: '打上花火', artist: 'DAOKO × 米津玄師' },
-    { title: 'アイドル', artist: 'YOASOBI' },
   ],
-  /** 首页轮播图 */
   carouselSlides: [
     { image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=500&fit=crop', title: '星空下的约定', subtitle: '原创科幻恋爱番 · 火星殖民地', link: '/anime' },
-    { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=500&fit=crop', title: '魔法少女的秘密', subtitle: 'C2C 出品 · 治愈系日常', link: '/anime' },
-    { image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=500&fit=crop', title: '剑与魔法的时代', subtitle: '异世界的文艺复兴', link: '/posts/anime-2025' },
-    { image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&h=500&fit=crop', title: 'Lycoris Recoil', subtitle: '千束和泷奈 · A-1 Pictures', link: '/anime' },
   ],
-  /** 侧边栏 Widget 可见性 */
   sidebarWidgets: {
-    stats: true,
-    announcement: true,
-    categories: true,
-    tags: true,
-    music: true,
-    calendar: true,
+    stats: true, announcement: true, categories: true, tags: true, music: true, calendar: true,
   },
-  /** 首页区块可见性 */
   homepageSections: {
-    hero: true,
-    about: true,
-    posts: true,
-    stats: true,
-    quickLinks: true,
+    hero: true, about: true, posts: true, stats: true, quickLinks: true,
   },
 };
 
-// GET /api/v1/settings — 公开设置
-router.get('/', (_req, res) => {
-  return success(res, siteSettings);
+async function loadSettings(): Promise<Record<string, any>> {
+  try {
+    const row = await prisma.siteSetting.findUnique({ where: { key: SETTINGS_KEY } });
+    if (row?.value) {
+      return { ...defaultSettings, ...JSON.parse(row.value) };
+    }
+  } catch {}
+  return { ...defaultSettings };
+}
+
+async function saveSettings(data: Record<string, any>): Promise<void> {
+  await prisma.siteSetting.upsert({
+    where: { key: SETTINGS_KEY },
+    create: { key: SETTINGS_KEY, value: JSON.stringify(data) },
+    update: { value: JSON.stringify(data) },
+  });
+}
+
+// GET — 公开设置
+router.get('/', async (_req, res) => {
+  try {
+    const settings = await loadSettings();
+    return success(res, settings);
+  } catch (err: any) {
+    return fail(res, err.message, 500);
+  }
 });
 
-// PUT /api/v1/settings — 更新设置（需管理员）
-router.put('/', requireAdmin, (req, res) => {
+// PUT — 更新设置（需管理员）
+router.put('/', requireAdmin, async (req, res) => {
   try {
+    const current = await loadSettings();
     const updates = req.body;
-    siteSettings = { ...siteSettings, ...updates };
-    // 深度合并嵌套对象
-    if (updates.socialLinks) {
-      siteSettings.socialLinks = { ...siteSettings.socialLinks, ...updates.socialLinks };
+
+    // keywords: 前端发来的是逗号字符串或数组，统一转成数组存储
+    if (typeof updates.keywords === 'string') {
+      updates.keywords = (updates.keywords as string).split(/[,，]/).map((s: string) => s.trim()).filter(Boolean);
     }
-    if (updates.sidebarWidgets) {
-      siteSettings.sidebarWidgets = { ...siteSettings.sidebarWidgets, ...updates.sidebarWidgets };
+    // bannerImages: 前端发来的是换行字符串或数组
+    if (typeof updates.bannerImages === 'string') {
+      updates.bannerImages = (updates.bannerImages as string).split('\n').map((s: string) => s.trim()).filter(Boolean);
     }
-    if (updates.homepageSections) {
-      siteSettings.homepageSections = { ...siteSettings.homepageSections, ...updates.homepageSections };
-    }
-    return success(res, siteSettings, '设置已更新');
+
+    const merged = { ...current, ...updates };
+    if (updates.socialLinks) merged.socialLinks = { ...current.socialLinks, ...updates.socialLinks };
+    if (updates.sidebarWidgets) merged.sidebarWidgets = { ...current.sidebarWidgets, ...updates.sidebarWidgets };
+    if (updates.homepageSections) merged.homepageSections = { ...current.homepageSections, ...updates.homepageSections };
+
+    await saveSettings(merged);
+    return success(res, merged, '设置已更新');
   } catch (err: any) {
     return fail(res, err.message, 500);
   }
