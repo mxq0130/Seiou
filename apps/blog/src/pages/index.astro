@@ -1,15 +1,16 @@
 ---
-import { getPosts } from '../lib/data';
+import { getPosts, getStats } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 
-let postCount = 0;
-let categoryCount = 0;
-let tagCount = 0;
+let postCount = 0, catCount = 0, tagCount = 0, runDays = 1;
 try {
-  const data = await getPosts({ limit: 1 });
-  postCount = data.total || 0;
+  const [posts, stats] = await Promise.all([getPosts({ limit: 1 }), getStats()]);
+  postCount = posts.total || 0;
+  catCount = stats.categories || 0;
+  tagCount = stats.tags || 0;
+  runDays = stats.runningDays || 1;
 } catch (e) {
   console.error('获取统计数据失败:', e);
 }
@@ -25,9 +26,9 @@ const features = [
 
 const stats = [
   { value: String(postCount), label: '文章', icon: '📝' },
-  { value: String(categoryCount), label: '分类', icon: '📂' },
+  { value: String(catCount), label: '分类', icon: '📂' },
   { value: String(tagCount), label: '标签', icon: '🏷️' },
-  { value: '1', label: '运行天数', icon: '⏱' },
+  { value: String(runDays), label: '运行天数', icon: '⏱' },
 ];
 ---
 

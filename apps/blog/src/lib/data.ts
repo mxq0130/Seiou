@@ -115,3 +115,10 @@ export async function getStats(): Promise<SiteStats> {
   }
   return fetchAPI<SiteStats>('/stats');
 }
+
+// ===== 公告 =====
+export async function getAnnouncements(params?: { active?: boolean }): Promise<any[]> {
+  if (isStatic) return [];
+  const qs = params?.active ? '?active=true' : '';
+  return fetchAPI<any[]>(`/announcements${qs}`);
+}

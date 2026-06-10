@@ -211,6 +211,17 @@ enum TargetType {
   IMAGE
 }
 
+// ===== 公告表 =====
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("announcements")
+}
+
 // ===== 站点设置 =====
 model SiteSetting {
   id        Int      @id @default(autoincrement())

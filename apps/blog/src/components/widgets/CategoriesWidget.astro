@@ -1,17 +1,26 @@
+---
+import { getCategories } from '../../lib/data';
+
+let categories: Array<{ id: number; name: string; slug: string; postCount: number }> = [];
+try {
+  categories = await getCategories();
+} catch (e) {
+  console.error('CategoriesWidget 加载失败:', e);
+}
+---
+
 <div class="glass rounded-xl p-5 card-accent">
   <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-4">📂 分类</h3>
-  <div class="space-y-2">
-    <a href="/archive?category=examples" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--color-primary-light)] transition-all group">
-      <span class="text-sm text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">示例文章</span>
-      <span class="text-xs text-[var(--color-text-secondary)] bg-[var(--color-primary-light)] px-2 py-0.5 rounded-full">4</span>
-    </a>
-    <a href="/archive?category=guides" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--color-primary-light)] transition-all group">
-      <span class="text-sm text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">使用指南</span>
-      <span class="text-xs text-[var(--color-text-secondary)] bg-[var(--color-primary-light)] px-2 py-0.5 rounded-full">1</span>
-    </a>
-    <a href="/archive?category=tech" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--color-primary-light)] transition-all group">
-      <span class="text-sm text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">技术分享</span>
-      <span class="text-xs text-[var(--color-text-secondary)] bg-[var(--color-primary-light)] px-2 py-0.5 rounded-full">1</span>
-    </a>
-  </div>
+  {categories.length > 0 ? (
+    <div class="space-y-2">
+      {categories.map(c => (
+        <a href={`/archive?category=${c.slug}`} class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--color-primary-light)] transition-all group">
+          <span class="text-sm text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">{c.name}</span>
+          <span class="text-xs text-[var(--color-text-secondary)] bg-[var(--color-primary-light)] px-2 py-0.5 rounded-full">{c.postCount}</span>
+        </a>
+      ))}
+    </div>
+  ) : (
+    <p class="text-xs text-[var(--color-text-secondary)] text-center py-2">暂无分类</p>
+  )}
 </div>

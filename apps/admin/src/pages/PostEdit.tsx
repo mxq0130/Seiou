@@ -10,6 +10,7 @@ export default function PostEditPage() {
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState('');
   const [categories, setCategories] = useState<{ value: number; label: string }[]>([]);
+  const [tags, setTags] = useState<{ value: number; label: string }[]>([]);
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
@@ -17,6 +18,9 @@ export default function PostEditPage() {
   useEffect(() => {
     api.get('/categories').then((res: any) => {
       setCategories((res.data || []).map((c: any) => ({ value: c.id, label: c.name })));
+    }).catch(() => {});
+    api.get('/tags').then((res: any) => {
+      setTags((res.data || []).map((t: any) => ({ value: t.id, label: t.name })));
     }).catch(() => {});
   }, []);
 
@@ -31,6 +35,7 @@ export default function PostEditPage() {
           excerpt: p.excerpt,
           cover: p.cover,
           pinned: p.pinned || false,
+          tagIds: p.tags?.map((t: any) => t.id) || [],
         });
         setContent(p.content || '');
       }).catch((err: any) => message.error('加载文章失败: ' + (err.message || '未知错误')));
@@ -70,6 +75,9 @@ export default function PostEditPage() {
           </Form.Item>
           <Form.Item name="categoryId" label="分类">
             <Select placeholder="选择分类" allowClear options={categories} />
+          </Form.Item>
+          <Form.Item name="tagIds" label="标签">
+            <Select mode="multiple" placeholder="选择标签" allowClear options={tags} />
           </Form.Item>
           <Form.Item name="cover" label="封面图" extra="填入图片 URL，或点击上传按钮选择本地图片">
             <div style={{ display: 'flex', gap: 8 }}>

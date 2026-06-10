@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, Row, Col, Statistic, List, Tag, Spin, Result } from 'antd';
-import { FileTextOutlined, UserOutlined, FolderOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { FileTextOutlined, UserOutlined, FolderOutlined, ClockCircleOutlined, TagsOutlined, FormOutlined } from '@ant-design/icons';
 import api from '../api/client';
 
 export default function DashboardPage() {
@@ -35,10 +35,12 @@ export default function DashboardPage() {
     <div>
       <h2 style={{ marginBottom: 24 }}>📊 仪表盘</h2>
       <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}><Card><Statistic title="文章" value={data.posts} prefix={<FileTextOutlined />} /></Card></Col>
-        <Col span={6}><Card><Statistic title="分类" value={data.categories} prefix={<FolderOutlined />} /></Card></Col>
-        <Col span={6}><Card><Statistic title="用户" value={data.users} prefix={<UserOutlined />} /></Card></Col>
-        <Col span={6}><Card><Statistic title="运行天数" value={data.runningDays} prefix={<ClockCircleOutlined />} /></Card></Col>
+        <Col span={4}><Card><Statistic title="文章" value={data.posts} prefix={<FileTextOutlined />} /></Card></Col>
+        <Col span={4}><Card><Statistic title="分类" value={data.categories} prefix={<FolderOutlined />} /></Card></Col>
+        <Col span={4}><Card><Statistic title="标签" value={data.tags} prefix={<TagsOutlined />} /></Card></Col>
+        <Col span={4}><Card><Statistic title="用户" value={data.users} prefix={<UserOutlined />} /></Card></Col>
+        <Col span={4}><Card><Statistic title="运行天数" value={data.runningDays} prefix={<ClockCircleOutlined />} /></Card></Col>
+        <Col span={4}><Card><Statistic title="总字数" value={(data.totalWords / 1000).toFixed(1) + 'k'} prefix={<FormOutlined />} /></Card></Col>
       </Row>
       <Row gutter={16}>
         <Col span={12}>

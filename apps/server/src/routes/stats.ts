@@ -7,11 +7,13 @@ const router = Router();
 
 router.get('/', async (_req, res) => {
   try {
-    const [postCount, categoryCount, userCount, firstPost, recentPosts, recentUsers] = await Promise.all([
+    const [postCount, categoryCount, tagCount, userCount, firstPost, lastPost, recentPosts, recentUsers] = await Promise.all([
       prisma.post.count({ where: { status: 'PUBLISHED' } }),
       prisma.category.count(),
+      prisma.tag.count(),
       prisma.user.count(),
       prisma.post.findFirst({ orderBy: { createdAt: 'asc' }, select: { createdAt: true } }),
+      prisma.post.findFirst({ where: { status: 'PUBLISHED' }, orderBy: { updatedAt: 'desc' }, select: { updatedAt: true } }),
       prisma.post.findMany({
         where: { status: 'PUBLISHED' },
         orderBy: { createdAt: 'desc' },
@@ -25,6 +27,13 @@ router.get('/', async (_req, res) => {
       }),
     ]);
 
+    // 计算总字数
+    const posts = await prisma.post.findMany({
+      where: { status: 'PUBLISHED' },
+      select: { content: true },
+    });
+    const totalWords = posts.reduce((sum, p) => sum + (p.content || '').length, 0);
+
     const runningDays = firstPost
       ? Math.floor((Date.now() - new Date(firstPost.createdAt).getTime()) / 86400000) + 1
       : 0;
@@ -32,8 +41,11 @@ router.get('/', async (_req, res) => {
     return success(res, {
       posts: postCount,
       categories: categoryCount,
+      tags: tagCount,
       users: userCount,
+      totalWords,
       runningDays,
+      lastActivity: lastPost?.updatedAt?.toISOString() || null,
       recentPosts: recentPosts.map(p => ({
         id: p.id,
         title: p.title,

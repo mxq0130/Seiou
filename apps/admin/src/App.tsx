@@ -13,6 +13,9 @@ import AlbumsPage from './pages/AlbumsManage';
 import DiaryPage from './pages/DiaryManage';
 import LinksPage from './pages/LinksManage';
 import AboutPage from './pages/AboutManage';
+import TagsPage from './pages/TagsManage';
+import CategoriesPage from './pages/CategoriesManage';
+import AnnouncementsPage from './pages/AnnouncementsManage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token');
@@ -38,6 +41,9 @@ export default function App() {
             <Route path="about" element={<AboutPage />} />
             <Route path="users" element={<UserListPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="tags" element={<TagsPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

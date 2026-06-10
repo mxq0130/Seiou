@@ -11,6 +11,7 @@ import aboutRoutes from './about.js';
 import statsRoutes from './stats.js';
 import categoriesRoutes from './categories.js';
 import tagsRoutes from './tags.js';
+import announcementsRoutes from './announcements.js';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.use('/about', aboutRoutes);
 router.use('/stats', statsRoutes);
 router.use('/categories', categoriesRoutes);
 router.use('/tags', tagsRoutes);
+router.use('/announcements', announcementsRoutes);
 
 // 健康检查
 router.get('/health', (_req, res) => {

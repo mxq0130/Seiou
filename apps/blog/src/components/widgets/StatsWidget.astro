@@ -1,25 +1,50 @@
+---
+import { getStats } from '../../lib/data';
+
+let stats = { posts: 0, categories: 0, tags: 0, totalWords: 0, runningDays: 0, lastActivity: '' };
+try {
+  stats = await getStats();
+} catch (e) {
+  console.error('StatsWidget 加载失败:', e);
+}
+
+function fmtWords(n: number): string {
+  if (n >= 10000) return (n / 10000).toFixed(1) + 'w';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  return String(n);
+}
+
+function daysAgo(s: string): string {
+  if (!s) return '暂无记录';
+  const d = Math.floor((Date.now() - new Date(s).getTime()) / 86400000);
+  if (d === 0) return '今天活跃';
+  if (d === 1) return '1 天前活跃';
+  return `${d} 天前活跃`;
+}
+---
+
 <div class="glass rounded-xl p-5 card-accent">
   <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-4">📊 站点统计</h3>
   <div class="grid grid-cols-2 gap-3">
     <div class="text-center p-2 rounded-lg bg-[var(--color-primary-light)]">
-      <div class="text-lg font-bold text-[var(--color-primary)]">6</div>
+      <div class="text-lg font-bold text-[var(--color-primary)]">{stats.posts}</div>
       <div class="text-xs text-[var(--color-text-secondary)]">文章</div>
     </div>
     <div class="text-center p-2 rounded-lg bg-[var(--color-primary-light)]">
-      <div class="text-lg font-bold text-[var(--color-primary)]">3</div>
+      <div class="text-lg font-bold text-[var(--color-primary)]">{stats.categories}</div>
       <div class="text-xs text-[var(--color-text-secondary)]">分类</div>
     </div>
     <div class="text-center p-2 rounded-lg bg-[var(--color-primary-light)]">
-      <div class="text-lg font-bold text-[var(--color-primary)]">10</div>
+      <div class="text-lg font-bold text-[var(--color-primary)]">{stats.tags}</div>
       <div class="text-xs text-[var(--color-text-secondary)]">标签</div>
     </div>
     <div class="text-center p-2 rounded-lg bg-[var(--color-primary-light)]">
-      <div class="text-lg font-bold text-[var(--color-primary)]">2.4k</div>
+      <div class="text-lg font-bold text-[var(--color-primary)]">{fmtWords(stats.totalWords)}</div>
       <div class="text-xs text-[var(--color-text-secondary)]">总字数</div>
     </div>
   </div>
   <div class="mt-3 flex justify-between text-xs text-[var(--color-text-secondary)]">
-    <span>⏱ 已运行 365 天</span>
-    <span>🕐 2 天前活跃</span>
+    <span>⏱ 已运行 {stats.runningDays} 天</span>
+    <span>🕐 {daysAgo(stats.lastActivity)}</span>
   </div>
 </div>

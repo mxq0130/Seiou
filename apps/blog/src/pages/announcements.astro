@@ -1,0 +1,33 @@
+---
+import { getAnnouncements } from '../lib/data';
+import Layout from '../layouts/Layout.astro';
+
+let announcements: any[] = [];
+try {
+  announcements = await getAnnouncements();
+} catch (e) {
+  console.error('加载公告失败:', e);
+}
+---
+
+<Layout title="公告历史">
+  <div class="max-w-2xl">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-2 gradient-text" style="font-family:var(--font-heading)">📢 公告历史</h1>
+    <p class="text-[var(--color-text-secondary)] mb-8">站点的所有公告记录</p>
+    {announcements.length > 0 ? (
+      <div class="space-y-4">
+        {announcements.map(a => (
+          <div class="glass rounded-xl p-5 card-accent">
+            <div class="flex items-center justify-between mb-2">
+              <span class={`text-xs px-2 py-0.5 rounded-full ${a.active ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>{a.active ? '🟢 当前生效' : '⏸ 已停用'}</span>
+              <span class="text-xs text-[var(--color-text-secondary)]">{new Date(a.createdAt).toLocaleDateString('zh-CN')}</span>
+            </div>
+            <p class="text-sm text-[var(--color-text)] leading-relaxed whitespace-pre-wrap">{a.content}</p>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16 text-[var(--color-text-secondary)]"><div class="text-5xl mb-4">📢</div><p>暂无公告</p></div>
+    )}
+  </div>
+</Layout>
