@@ -2,59 +2,58 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="注册" description="注册二次元博客账号">
-  <div class="container-page py-12 sm:py-20">
-    <div class="max-w-md mx-auto">
-      <div class="card p-8">
-        <div class="text-center mb-8">
-          <span class="text-5xl mb-4 block">🎉</span>
-          <h1 class="text-2xl font-bold" style="color: var(--color-text);">创建账号</h1>
-          <p class="text-sm mt-2" style="color: var(--color-text-secondary);">加入二次元博客社区</p>
+<Layout title="注册">
+  <div class="max-w-md mx-auto pt-8">
+    <h1 class="text-2xl font-bold mb-8 text-center gradient-text" style="font-family:var(--font-heading)">✨ 注册新账号</h1>
+    <div class="glass rounded-xl p-6" id="register-form">
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm text-[var(--color-text-secondary)] mb-1 block">用户名</label>
+          <input id="reg-username" class="w-full p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-sm" placeholder="给自己起个名字" />
         </div>
-
-        <form class="flex flex-col gap-4">
-          <div>
-            <label for="username" class="block text-sm font-medium mb-1" style="color: var(--color-text);">用户名</label>
-            <input
-              type="text" id="username" name="username" placeholder="你的昵称"
-              class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-colors"
-              style="background: var(--color-bg); border-color: var(--color-border); color: var(--color-text);"
-            />
-          </div>
-
-          <div>
-            <label for="email" class="block text-sm font-medium mb-1" style="color: var(--color-text);">邮箱</label>
-            <input
-              type="email" id="email" name="email" placeholder="your@email.com"
-              class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-colors"
-              style="background: var(--color-bg); border-color: var(--color-border); color: var(--color-text);"
-            />
-          </div>
-
-          <div>
-            <label for="password" class="block text-sm font-medium mb-1" style="color: var(--color-text);">密码</label>
-            <input
-              type="password" id="password" name="password" placeholder="至少6位密码"
-              class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-colors"
-              style="background: var(--color-bg); border-color: var(--color-border); color: var(--color-text);"
-            />
-          </div>
-
-          <button type="submit" class="w-full py-2.5 rounded-lg font-medium text-sm transition-all cursor-pointer mt-2"
-            style="background: var(--color-primary); color: var(--color-on-primary); border: none;">
-            注册
-          </button>
-        </form>
-
-        <p class="mt-4 text-xs text-center" style="color: var(--color-text-secondary);">
-          注册即表示同意本站的服务条款和隐私政策
-        </p>
-
-        <div class="mt-6 text-center text-sm" style="color: var(--color-text-secondary);">
-          已有账号？
-          <a href="/login" class="font-medium ml-1 hover:underline" style="color: var(--color-primary);">立即登录</a>
+        <div>
+          <label class="text-sm text-[var(--color-text-secondary)] mb-1 block">邮箱</label>
+          <input id="reg-email" type="email" class="w-full p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-sm" placeholder="email@example.com" />
         </div>
+        <div>
+          <label class="text-sm text-[var(--color-text-secondary)] mb-1 block">密码</label>
+          <input id="reg-password" type="password" class="w-full p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-sm" placeholder="至少6位密码" />
+        </div>
+        <button id="reg-btn" class="w-full py-3 rounded-full text-white font-medium" style="background:var(--color-gradient)">注 册</button>
       </div>
+      <p id="reg-msg" class="text-xs text-center mt-3 hidden"></p>
+      <p class="text-center text-sm text-[var(--color-text-secondary)] mt-4">
+        已有账号？<a href="/login" class="text-[var(--color-primary)] hover:underline">立即登录</a>
+      </p>
     </div>
   </div>
 </Layout>
+
+<script>
+  document.getElementById('reg-btn')?.addEventListener('click', async () => {
+    const username = (document.getElementById('reg-username') as any)?.value;
+    const email = (document.getElementById('reg-email') as any)?.value;
+    const password = (document.getElementById('reg-password') as any)?.value;
+    const msg = document.getElementById('reg-msg')!;
+    if (!username || !email || !password) { msg.className='text-xs text-center mt-3 text-red-500'; msg.style.display='block'; msg.textContent='请填写所有字段'; return; }
+    if (password.length < 6) { msg.className='text-xs text-center mt-3 text-red-500'; msg.style.display='block'; msg.textContent='密码至少6位'; return; }
+    const btn = document.getElementById('reg-btn')!;
+    btn.setAttribute('disabled','true'); btn.textContent = '注册中...';
+    try {
+      const res = await fetch('/api/v1/auth/register', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, email, password})
+      });
+      const json = await res.json();
+      if (json.code === 0) {
+        msg.className='text-xs text-center mt-3 text-green-500'; msg.style.display='block'; msg.textContent = '注册成功！即将跳转登录...';
+        setTimeout(() => window.location.href = '/login', 1500);
+      } else {
+        msg.className='text-xs text-center mt-3 text-red-500'; msg.style.display='block'; msg.textContent = json.message || '注册失败';
+      }
+    } catch(e) {
+      msg.className='text-xs text-center mt-3 text-red-500'; msg.style.display='block'; msg.textContent = '网络错误';
+    }
+    btn.removeAttribute('disabled'); btn.textContent = '注 册';
+  });
+</script>

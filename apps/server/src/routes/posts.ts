@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 import { success, fail, paginate } from '../utils/response.js';
-import { requireAdmin, optionalAuth } from '../middleware/auth.js';
+import { requireAdmin, requireAuth, optionalAuth } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -104,8 +104,8 @@ router.get('/:slug', optionalAuth, async (req, res) => {
   }
 });
 
-// 管理员：创建文章
-router.post('/', requireAdmin, async (req, res) => {
+// 登录用户：创建文章（管理员直接发布，普通用户需审核）
+router.post('/', requireAuth, async (req, res) => {
   try {
     const body = z.object({
       title: z.string().min(1).max(200),
@@ -114,10 +114,13 @@ router.post('/', requireAdmin, async (req, res) => {
       excerpt: z.string().max(500).optional().nullable(),
       cover: z.string().max(500).optional().nullable(),
       pinned: z.boolean().optional(),
-      status: z.enum(['DRAFT', 'PUBLISHED']).optional(),
+      status: z.enum(['DRAFT', 'PUBLISHED', 'PENDING']).optional(),
       categoryId: z.number().int().optional().nullable(),
       tagIds: z.array(z.number().int()).optional(),
     }).parse(req.body);
+
+    const isAdmin = req.user!.role === 'ADMIN';
+    const finalStatus = isAdmin ? (body.status || 'DRAFT') : 'PENDING';
 
     const post = await prisma.post.create({
       data: {
@@ -126,17 +129,44 @@ router.post('/', requireAdmin, async (req, res) => {
         content: body.content,
         excerpt: body.excerpt,
         cover: body.cover,
-        pinned: body.pinned,
-        status: body.status || 'DRAFT',
+        pinned: isAdmin ? body.pinned : false,
+        status: finalStatus,
         authorId: req.user!.userId,
         categoryId: body.categoryId,
         tags: body.tagIds ? { create: body.tagIds.map((tagId) => ({ tagId })) } : undefined,
       },
     });
 
-    return success(res, { post }, '创建成功');
+    return success(res, { post }, isAdmin ? '创建成功' : '投稿成功，等待管理员审核');
   } catch (err: any) {
     if (err instanceof z.ZodError) return fail(res, '参数校验失败: ' + err.message);
+    return fail(res, err.message, 500);
+  }
+});
+
+// 管理员 - 待审核文章列表
+router.get('/pending', requireAdmin, async (_req, res) => {
+  try {
+    const posts = await prisma.post.findMany({
+      where: { status: 'PENDING' },
+      include: { author: { select: { id: true, username: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    return success(res, posts);
+  } catch (err: any) { return fail(res, err.message, 500); }
+});
+
+// 管理员 - 审核文章
+router.put('/:id/approve', requireAdmin, async (req, res) => {
+  try {
+    const { approved } = req.body; // true=发布, false=退回草稿
+    const post = await prisma.post.update({
+      where: { id: parseInt(String(req.params.id)) },
+      data: { status: approved ? 'PUBLISHED' : 'DRAFT' },
+    });
+    return success(res, post, approved ? '已通过审核' : '已退回');
+  } catch (err: any) {
+    if (err.code === 'P2025') return fail(res, '文章不存在', 404);
     return fail(res, err.message, 500);
   }
 });

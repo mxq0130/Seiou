@@ -1,56 +1,56 @@
 ---
 import Layout from '../layouts/Layout.astro';
+const redirect = Astro.url.searchParams.get('redirect') || '/';
 ---
 
-<Layout title="登录" description="登录到二次元博客">
-  <div class="container-page py-12 sm:py-20">
-    <div class="max-w-md mx-auto">
-      <div class="card p-8">
-        <div class="text-center mb-8">
-          <span class="text-5xl mb-4 block">🌸</span>
-          <h1 class="text-2xl font-bold" style="color: var(--color-text);">欢迎回来</h1>
-          <p class="text-sm mt-2" style="color: var(--color-text-secondary);">登录你的账号</p>
+<Layout title="登录">
+  <div class="max-w-md mx-auto pt-8">
+    <h1 class="text-2xl font-bold mb-8 text-center gradient-text" style="font-family:var(--font-heading)">🔑 登录</h1>
+    <div class="glass rounded-xl p-6" id="login-form">
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm text-[var(--color-text-secondary)] mb-1 block">用户名或邮箱</label>
+          <input id="login-username" class="w-full p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-sm" placeholder="admin 或 email@example.com" />
         </div>
-
-        <form class="flex flex-col gap-4">
-          <div>
-            <label for="email" class="block text-sm font-medium mb-1" style="color: var(--color-text);">邮箱</label>
-            <input
-              type="email" id="email" name="email" placeholder="your@email.com"
-              class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-colors"
-              style="background: var(--color-bg); border-color: var(--color-border); color: var(--color-text);"
-              class:list={["focus:border-[var(--color-primary)]"]}
-            />
-          </div>
-
-          <div>
-            <label for="password" class="block text-sm font-medium mb-1" style="color: var(--color-text);">密码</label>
-            <input
-              type="password" id="password" name="password" placeholder="输入密码"
-              class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-colors"
-              style="background: var(--color-bg); border-color: var(--color-border); color: var(--color-text);"
-            />
-          </div>
-
-          <div class="flex items-center justify-between text-sm">
-            <label class="flex items-center gap-2 cursor-pointer" style="color: var(--color-text-secondary);">
-              <input type="checkbox" class="rounded" />
-              记住我
-            </label>
-            <a href="#" class="hover:underline" style="color: var(--color-primary);">忘记密码？</a>
-          </div>
-
-          <button type="submit" class="w-full py-2.5 rounded-lg font-medium text-sm transition-all cursor-pointer mt-2"
-            style="background: var(--color-primary); color: var(--color-on-primary); border: none;">
-            登录
-          </button>
-        </form>
-
-        <div class="mt-6 text-center text-sm" style="color: var(--color-text-secondary);">
-          还没有账号？
-          <a href="/register" class="font-medium ml-1 hover:underline" style="color: var(--color-primary);">立即注册</a>
+        <div>
+          <label class="text-sm text-[var(--color-text-secondary)] mb-1 block">密码</label>
+          <input id="login-password" type="password" class="w-full p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-sm" placeholder="••••••" />
         </div>
+        <button id="login-btn" class="w-full py-3 rounded-full text-white font-medium" style="background:var(--color-gradient)">登 录</button>
       </div>
+      <p id="login-msg" class="text-xs text-center mt-3 hidden"></p>
+      <p class="text-center text-sm text-[var(--color-text-secondary)] mt-4">
+        还没有账号？<a href="/register" class="text-[var(--color-primary)] hover:underline">立即注册</a>
+      </p>
     </div>
   </div>
 </Layout>
+
+<script>
+  document.getElementById('login-btn')?.addEventListener('click', async () => {
+    const username = (document.getElementById('login-username') as any)?.value;
+    const password = (document.getElementById('login-password') as any)?.value;
+    const msg = document.getElementById('login-msg')!;
+    if (!username || !password) { msg.className='text-xs text-center mt-3 text-red-500'; msg.style.display='block'; msg.textContent='请填写用户名和密码'; return; }
+    const btn = document.getElementById('login-btn')!;
+    btn.setAttribute('disabled','true'); btn.textContent = '登录中...';
+    try {
+      const res = await fetch('/api/v1/auth/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, password})
+      });
+      const json = await res.json();
+      if (json.code === 0) {
+        localStorage.setItem('token', json.data.token);
+        localStorage.setItem('user', JSON.stringify(json.data.user));
+        const rd = '{redirect}';
+        window.location.href = rd.replace(/&amp;/g,'&');
+      } else {
+        msg.className='text-xs text-center mt-3 text-red-500'; msg.style.display='block'; msg.textContent = json.message || '登录失败';
+      }
+    } catch(e) {
+      msg.className='text-xs text-center mt-3 text-red-500'; msg.style.display='block'; msg.textContent = '网络错误';
+    }
+    btn.removeAttribute('disabled'); btn.textContent = '登 录';
+  });
+</script>

@@ -34,6 +34,9 @@ try { const s = await getSettings(); if (s.title) siteTitle = s.title; } catch {
         <a href="/search/" class="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)] transition-all" title="搜索" aria-label="搜索">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </a>
+        <a href="/login" class="hidden sm:inline-flex text-xs px-3 py-1.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all" id="nav-login-btn">登录</a>
+        <a href="/register" class="hidden sm:inline-flex text-xs px-3 py-1.5 rounded-full border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all" id="nav-reg-btn">注册</a>
+        <span id="nav-user-name" class="hidden text-sm font-medium text-[var(--color-primary)] cursor-pointer" onclick="window.location.href='/user/'+this.textContent"></span>
         <button id="theme-toggle" class="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)] transition-all" title="切换主题" aria-label="切换主题">
           <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
@@ -66,6 +69,12 @@ try { const s = await getSettings(); if (s.title) siteTitle = s.title; } catch {
     sunIcon.classList.toggle('hidden', isDark);
     moonIcon.classList.toggle('hidden', !isDark);
   }
+  // 登录状态检查
+  (function(){
+    var u=localStorage.getItem('user');
+    if(u){try{var d=JSON.parse(u);document.getElementById('nav-login-btn')?.classList.add('hidden');document.getElementById('nav-reg-btn')?.classList.add('hidden');var n=document.getElementById('nav-user-name');if(n){n.classList.remove('hidden');n.textContent=d.username}}catch(e){}}
+  })();
+
   updateIcons();
   toggle?.addEventListener('click', () => {
     html.classList.toggle('dark');

@@ -61,4 +61,32 @@ router.delete('/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// 公开 - 用户主页
+router.get('/profile/:username', async (req, res) => {
+  try {
+    const username = String(req.params.username);
+    const user = await prisma.user.findFirst({
+      where: { username },
+      select: { id: true, username: true, avatar: true, role: true, createdAt: true },
+    });
+    if (!user) return fail(res, '用户不存在', 404);
+
+    const [posts, anime] = await Promise.all([
+      prisma.post.findMany({
+        where: { authorId: user.id, status: 'PUBLISHED' },
+        select: { id: true, title: true, slug: true, excerpt: true, cover: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      }),
+      prisma.anime.findMany({
+        select: { id: true, title: true, cover: true, progress: true, total: true, rating: true, status: true },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+      }),
+    ]);
+
+    return success(res, { user, posts, anime });
+  } catch (err: any) { return fail(res, err.message, 500); }
+});
+
 export default router;

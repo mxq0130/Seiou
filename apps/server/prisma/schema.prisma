@@ -88,6 +88,7 @@ model Post {
 enum PostStatus {
   DRAFT
   PUBLISHED
+  PENDING
 }
 
 // ===== 文章标签关联 =====
