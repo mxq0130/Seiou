@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { getSettings } from '../lib/data';
 import NavBar from '../components/NavBar.astro';
 import Footer from '../components/Footer.astro';
 import Sidebar from '../components/Sidebar.astro';
@@ -14,13 +15,18 @@ export interface Props {
 
 const {
   title,
-  description = '二次元风格个人博客 - 记录生活与技术',
+  description: propDesc,
   image,
   ogType = 'website',
   noSidebar = false,
 } = Astro.props;
 
-const siteTitle = '🌸 小破站';
+// 读取站点设置
+let settings: any = {};
+try { settings = await getSettings(); } catch {}
+
+const siteTitle = settings.title || '🌸 小破站';
+const description = propDesc || settings.description || '二次元风格个人博客';
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://example.com').href;
 ---
 

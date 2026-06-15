@@ -116,6 +116,19 @@ export async function getStats(): Promise<SiteStats> {
   return fetchAPI<SiteStats>('/stats');
 }
 
+// ===== 站点设置 =====
+let cachedSettings: any = null;
+let settingsCacheTime = 0;
+
+export async function getSettings(): Promise<Record<string, any>> {
+  if (isStatic) return {};
+  // 缓存 60 秒，避免每个页面请求都打 API
+  if (cachedSettings && Date.now() - settingsCacheTime < 60000) return cachedSettings;
+  cachedSettings = await fetchAPI<Record<string, any>>('/settings');
+  settingsCacheTime = Date.now();
+  return cachedSettings || {};
+}
+
 // ===== 公告 =====
 export async function getAnnouncements(params?: { active?: boolean }): Promise<any[]> {
   if (isStatic) return [];
