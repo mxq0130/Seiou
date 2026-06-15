@@ -85,7 +85,7 @@ export default function AlbumsPage() {
             const fd = new FormData(); fd.append('file', file);
             api.post('/images/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' }, transformRequest: [(d: any) => d] }).then((r: any) => {
               if (r.code === 0) { setImgUrl(r.data.url); message.success('上传成功'); onSuccess?.(r.data); }
-            }).catch(() => message.error('上传失败'));
+            }).catch((e: any) => message.error('上传失败: ' + (e?.message || '未知错误')));
           }}>
             <Button icon={<UploadOutlined />}>本地上传</Button>
           </Upload>
