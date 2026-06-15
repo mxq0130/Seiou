@@ -57,7 +57,7 @@ const formattedDate = new Date(post.createdAt).toLocaleDateString('zh-CN', {
       ))}
     </div>
     <div class="mt-12 pt-6 border-t border-[var(--color-border)]">
-      <CommentSection />
+      <CommentSection targetType="POST" targetId={post.id} />
     </div>
   </article>
 </Layout>
