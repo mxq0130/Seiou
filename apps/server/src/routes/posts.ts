@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
           category: { select: { id: true, name: true, slug: true } },
           tags: { select: { tag: { select: { id: true, name: true, slug: true } } } },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ pinned: 'desc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
       }),
