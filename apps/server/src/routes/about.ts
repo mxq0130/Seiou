@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { success, fail } from '../utils/response.js';
-import { requireAuth } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -35,7 +34,7 @@ router.get('/', async (_req, res) => {
   try { return success(res, await load()); } catch (e: any) { return fail(res, e.message, 500); }
 });
 
-router.put('/', requireAuth, async (req, res) => {
+router.put('/', async (req, res) => {
   try {
     const data = { ...await load(), ...req.body };
     await prisma.siteSetting.upsert({
