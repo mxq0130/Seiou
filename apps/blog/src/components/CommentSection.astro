@@ -64,16 +64,19 @@ if (targetId) {
   </div>
 </div>
 
-<script is:inline>
-  var targetType = '{targetType}';
-  var targetId = '{targetId}';
+<div id="comment-meta" style="display:none" data-type={targetType} data-id={targetId}></div>
+
+<script>
+  var meta = document.getElementById('comment-meta');
+  var targetType = meta?.getAttribute('data-type') || 'POST';
+  var targetId = parseInt(meta?.getAttribute('data-id') || '0');
   var btn = document.getElementById('comment-submit');
   var input = document.getElementById('comment-input');
   var msg = document.getElementById('comment-msg');
 
   btn?.addEventListener('click', async function() {
     var content = input?.value.trim();
-    if (!content) { msg.className='text-xs mt-2 text-center text-red-500'; msg.style.display='block'; msg.textContent='请输入评论内容'; return; }
+    if (!content) { msg.className='text-xs mt-2 text-center'; msg.style.color='#ff4d4f'; msg.style.display='block'; msg.textContent='请输入评论内容'; return; }
 
     btn.setAttribute('disabled','true');
     btn.textContent = '提交中...';
@@ -85,7 +88,7 @@ if (targetId) {
       var res = await fetch('/api/v1/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ content: content, targetType: targetType, targetId: parseInt(targetId) })
+        body: JSON.stringify({ content: content, targetType: targetType, targetId: targetId })
       });
       var json = await res.json();
       if (json.code === 0) {
