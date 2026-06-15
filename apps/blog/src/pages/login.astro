@@ -4,6 +4,7 @@ const redirect = Astro.url.searchParams.get('redirect') || '/';
 ---
 
 <Layout title="登录">
+  <div id="login-redirect" style="display:none" data-redirect={redirect}></div>
   <div class="max-w-md mx-auto pt-8">
     <h1 class="text-2xl font-bold mb-8 text-center gradient-text" style="font-family:var(--font-heading)">🔑 登录</h1>
     <div class="glass rounded-xl p-6" id="login-form">
@@ -43,8 +44,8 @@ const redirect = Astro.url.searchParams.get('redirect') || '/';
       if (json.code === 0) {
         localStorage.setItem('token', json.data.token);
         localStorage.setItem('user', JSON.stringify(json.data.user));
-        const rd = '{redirect}';
-        window.location.href = rd.replace(/&amp;/g,'&');
+        const rd = document.getElementById('login-redirect')?.getAttribute('data-redirect') || '/';
+        window.location.href = rd;
       } else {
         msg.className='text-xs text-center mt-3 text-red-500'; msg.style.display='block'; msg.textContent = json.message || '登录失败';
       }
