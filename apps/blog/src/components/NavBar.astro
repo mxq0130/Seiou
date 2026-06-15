@@ -8,7 +8,7 @@ const navLinks = [
   { href: '/anime/', label: '追番' },
   { href: '/albums/', label: '图集' },
   { href: '/diary/', label: '日记' },
-  { href: '/about/', label: '关于' },
+  { href: '/about/', label: '我的', id: 'nav-profile-link' },
 ];
 const currentPath = Astro.url.pathname;
 let siteTitle = '🌸 小破站';
@@ -72,7 +72,18 @@ try { const s = await getSettings(); if (s.title) siteTitle = s.title; } catch {
   // 登录状态检查
   (function(){
     var u=localStorage.getItem('user');
-    if(u){try{var d=JSON.parse(u);document.getElementById('nav-login-btn')?.classList.add('hidden');document.getElementById('nav-reg-btn')?.classList.add('hidden');var n=document.getElementById('nav-user-name');if(n){n.classList.remove('hidden');n.textContent=d.username}}catch(e){}}
+    if(u){try{
+      var d=JSON.parse(u);
+      // 隐藏登录/注册按钮
+      document.getElementById('nav-login-btn')?.classList.add('hidden');
+      document.getElementById('nav-reg-btn')?.classList.add('hidden');
+      // 显示用户名
+      var n=document.getElementById('nav-user-name');
+      if(n){n.classList.remove('hidden');n.textContent=d.username}
+      // 更新"我的"链接
+      var pl=document.getElementById('nav-profile-link');
+      if(pl)pl.href='/user/'+d.username;
+    }catch(e){}}
   })();
 
   updateIcons();

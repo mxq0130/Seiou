@@ -67,6 +67,16 @@ if (targetId) {
 <div id="comment-meta" style="display:none" data-type={targetType} data-id={targetId}></div>
 
 <script>
+  // 登录用户显示昵称
+  (function(){
+    var u=localStorage.getItem('user');
+    if(u){try{
+      var d=JSON.parse(u);
+      var inp=document.getElementById('comment-input');
+      if(inp)inp.placeholder='以 '+d.username+' 的身份评论...';
+    }catch(e){}}
+  })();
+
   var meta = document.getElementById('comment-meta');
   var targetType = meta?.getAttribute('data-type') || 'POST';
   var targetId = parseInt(meta?.getAttribute('data-id') || '0');

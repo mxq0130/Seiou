@@ -16,7 +16,18 @@ try {
 } catch {}
 ---
 
-<Layout title="关于">
+<Layout title="我的">
+  <!-- 登录检测：已登录跳转用户主页，未登录跳转登录页 -->
+  <div id="about-check" style="display:none"></div>
+  <script>
+    (function(){
+      var u = localStorage.getItem('user');
+      if (u) {
+        try { var d = JSON.parse(u); window.location.href = '/user/' + d.username; return; } catch(e) {}
+      }
+      window.location.href = '/login?redirect=/about';
+    })();
+  </script>
   <div class="max-w-3xl">
     <h1 class="text-2xl sm:text-3xl font-bold mb-8 gradient-text" style="font-family:var(--font-heading)">👤 关于</h1>
 
