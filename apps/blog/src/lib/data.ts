@@ -10,6 +10,21 @@ const isStatic = import.meta.env.ASTRO_MODE === 'static';
 // 服务端 fetch API 用 127.0.0.1（容器/本地访问），客户端走代理 /api/v1
 const API_BASE = isStatic ? '' : (typeof window === 'undefined' ? 'http://127.0.0.1:3000/api/v1' : '/api/v1');
 
+// ===== SSR 缓存（避免每个页面请求多次调用同一 API） =====
+const cache = new Map<string, { data: any; ts: number }>();
+const TTL = 30000; // 30秒缓存
+const isSSR = typeof window === 'undefined';
+
+async function cachedFetch<T>(path: string, ttl = TTL): Promise<T> {
+  if (isSSR) {
+    const entry = cache.get(path);
+    if (entry && Date.now() - entry.ts < ttl) return entry.data as T;
+  }
+  const data = await fetchAPI<T>(path);
+  if (isSSR) cache.set(path, { data, ts: Date.now() });
+  return data;
+}
+
 // ===== 通用 fetch 封装 =====
 async function fetchAPI<T>(path: string): Promise<T> {
   const url = `${API_BASE}${path}`;
@@ -59,7 +74,7 @@ export async function getCategories(): Promise<Category[]> {
     const { mockCategories } = await import('./mock');
     return mockCategories;
   }
-  return fetchAPI<Category[]>('/categories');
+  return cachedFetch<Category[]>('/categories');
 }
 
 export async function getTags(): Promise<Tag[]> {
@@ -67,7 +82,7 @@ export async function getTags(): Promise<Tag[]> {
     const { mockTags } = await import('./mock');
     return mockTags;
   }
-  return fetchAPI<Tag[]>('/tags');
+  return cachedFetch<Tag[]>('/tags');
 }
 
 // ===== 追番 =====
@@ -77,7 +92,7 @@ export async function getAnimeList(status?: string): Promise<Anime[]> {
     return status && status !== 'all' ? mockAnime.filter(a => a.status === status) : mockAnime;
   }
   const qs = status ? `?status=${status}` : '';
-  return fetchAPI<Anime[]>(`/anime${qs}`);
+  return cachedFetch<Anime[]>(`/anime${qs}`);
 }
 
 // ===== 友链 =====
@@ -86,7 +101,7 @@ export async function getLinks(): Promise<Link[]> {
     const { mockLinks } = await import('./mock');
     return mockLinks.filter(l => l.approved);
   }
-  return fetchAPI<Link[]>('/links');
+  return cachedFetch<Link[]>('/links');
 }
 
 // ===== 图集 =====
@@ -95,7 +110,7 @@ export async function getAlbums(): Promise<Album[]> {
     const { mockAlbums } = await import('./mock');
     return mockAlbums;
   }
-  return fetchAPI<Album[]>('/albums');
+  return cachedFetch<Album[]>('/albums');
 }
 
 // ===== 日记 =====
