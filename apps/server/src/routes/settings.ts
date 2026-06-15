@@ -21,10 +21,6 @@ const defaultSettings = {
   keywords: ['博客', '二次元', '前端', 'Astro'],
   author: 'まつざか ゆき',
   authorBio: '一个热爱二次元的前端开发者。喜欢摄影、追番、写代码。',
-  bannerImages: [
-    'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=600&fit=crop',
-  ],
   announcement: '',
   footer: '© 2025 まつざか ゆき. All Rights Reserved.',
   socialLinks: {
@@ -84,11 +80,6 @@ router.put('/', requireAdmin, async (req, res) => {
     if (typeof updates.keywords === 'string') {
       updates.keywords = (updates.keywords as string).split(/[,，]/).map((s: string) => s.trim()).filter(Boolean);
     }
-    // bannerImages: 前端发来的是换行字符串或数组
-    if (typeof updates.bannerImages === 'string') {
-      updates.bannerImages = (updates.bannerImages as string).split('\n').map((s: string) => s.trim()).filter(Boolean);
-    }
-
     const merged = { ...current, ...updates };
     if (updates.socialLinks) merged.socialLinks = { ...current.socialLinks, ...updates.socialLinks };
     if (updates.sidebarWidgets) merged.sidebarWidgets = { ...current.sidebarWidgets, ...updates.sidebarWidgets };

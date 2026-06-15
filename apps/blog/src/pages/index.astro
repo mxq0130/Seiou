@@ -1,7 +1,6 @@
 ---
 import { getPosts, getStats } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero.astro';
 import Carousel from '../components/Carousel.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 
@@ -34,7 +33,6 @@ const stats = [
 ---
 
 <Layout title="首页" noSidebar>
-  <Hero />
   <Carousel />
 
   <!-- 功能介绍卡片 -->

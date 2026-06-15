@@ -16,7 +16,6 @@ export default function SettingsPage() {
         const s = res.data;
         // 数组字段转字符串，适配表单控件
         if (Array.isArray(s.keywords)) s.keywords = s.keywords.join(', ');
-        if (Array.isArray(s.bannerImages)) s.bannerImages = s.bannerImages.join('\n');
         if (Array.isArray(s.musicPlaylist)) s.musicPlaylist = s.musicPlaylist.map((m: any) => `${m.title} - ${m.artist}`).join('\n');
         form.setFieldsValue(s);
       })
@@ -31,9 +30,6 @@ export default function SettingsPage() {
       const payload = { ...values };
       if (typeof payload.keywords === 'string') {
         payload.keywords = payload.keywords.split(/[,，]/).map((s: string) => s.trim()).filter(Boolean);
-      }
-      if (typeof payload.bannerImages === 'string') {
-        payload.bannerImages = payload.bannerImages.split('\n').map((s: string) => s.trim()).filter(Boolean);
       }
       if (typeof payload.musicPlaylist === 'string') {
         payload.musicPlaylist = payload.musicPlaylist.split('\n').map((line: string) => {
@@ -66,7 +62,6 @@ export default function SettingsPage() {
           keywords: ['博客', '二次元', '前端', 'Astro'],
           author: 'まつざか ゆき',
           authorBio: '一个热爱二次元的前端开发者。',
-          bannerImages: ['', ''],
           announcement: 'ブログへようこそ！',
           footer: '© 2025 まつざか ゆき. All Rights Reserved.',
           socialLinks: { github: '', bilibili: '', email: '' },
@@ -133,9 +128,6 @@ export default function SettingsPage() {
 
         {/* ===== 首页配置 ===== */}
         <Card title="🏠 首页配置" style={{ marginBottom: 16 }}>
-          <Form.Item label="Banner 图片 (每行一个URL)" name="bannerImages">
-            <Input.TextArea rows={3} placeholder="https://..." />
-          </Form.Item>
           <Form.Item label="首页公告" name="announcement">
             <Input.TextArea rows={2} />
           </Form.Item>

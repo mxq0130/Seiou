@@ -2,63 +2,123 @@
 import { getSettings } from '../lib/data';
 
 const defaultSlides = [
-  { image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=500&fit=crop', title: '星空下的约定', subtitle: '原创科幻恋爱番', link: '/anime' },
-  { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=500&fit=crop', title: '魔法少女的秘密', subtitle: 'C2C · 治愈系日常', link: '/anime' },
+  { image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1920&h=1080&fit=crop', title: '创造与分享', subtitle: '记录前端开发、动画追番与生活随笔', link: '/posts' },
+  { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop', title: '皆为热爱', subtitle: '一个二次元爱好者的个人空间', link: '/anime' },
 ];
 
 let slides = defaultSlides;
-try { const s = await getSettings(); if (s.carouselSlides && s.carouselSlides.length > 0) slides = s.carouselSlides; } catch {}
+let subtitle = 'PERSONAL BLOG';
+try {
+  const s = await getSettings();
+  if (s.carouselSlides && s.carouselSlides.length > 0) slides = s.carouselSlides;
+  if (s.subtitle) subtitle = s.subtitle;
+} catch {}
 ---
 
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
-  <div class="relative overflow-hidden rounded-2xl" style="box-shadow: var(--shadow-card-hover);">
-    <div class="carousel-track flex transition-transform duration-700 ease-out" id="carousel-track">
-      {slides.map((slide, i) => (
-        <a href={slide.link || '#'} class="carousel-slide w-full shrink-0 relative group cursor-pointer" style="aspect-ratio: 12/5;">
-          <img src={slide.image} alt={slide.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading={i === 0 ? 'eager' : 'lazy'} />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
-          <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-            <h3 class="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">{slide.title}</h3>
-            <p class="text-sm sm:text-base text-white/80 mt-1 drop-shadow">{slide.subtitle}</p>
-          </div>
-        </a>
-      ))}
+<section class="hero-root" id="hero-root">
+  <div class="hero-bg" id="hero-bg">
+    {slides.map((slide, i) => (
+      <img
+        src={slide.image}
+        alt={slide.title || ''}
+        class={`hero-slide ${i === 0 ? 'active' : ''}`}
+        data-index={i}
+        fetchpriority={i === 0 ? 'high' : 'auto'}
+        loading={i === 0 ? 'eager' : 'lazy'}
+      />
+    ))}
+    <div class="hero-overlay"></div>
+  </div>
+
+  <div class="hero-lights" aria-hidden="true">
+    <div class="light light-1"></div>
+    <div class="light light-2"></div>
+    <div class="light light-3"></div>
+  </div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">{subtitle}</p>
+    <h1 class="hero-title">
+      <span class="title-line" id="slide-title">{slides[0]?.title || ''}</span>
+      <span class="title-line accent" id="slide-subtitle">{slides[0]?.subtitle || ''}</span>
+    </h1>
+    <div class="hero-actions">
+      <a href="/posts" class="btn-primary">
+        <span>浏览文章</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9-5-9-5"/></svg>
+      </a>
+      <a href="/about" class="btn-ghost">关于我</a>
     </div>
-    <button id="carousel-prev" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 flex items-center justify-center text-white transition-all z-10" aria-label="上一张">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <button id="carousel-next" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 flex items-center justify-center text-white transition-all z-10" aria-label="下一张">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
-    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-      {slides.map((_, i) => (
-        <button class="carousel-dot w-2 h-2 rounded-full transition-all duration-300 bg-white/50 hover:bg-white/80" data-index={i} aria-label={`第 ${i + 1} 张`}></button>
-      ))}
-    </div>
+  </div>
+
+  <div class="hero-dots" id="hero-dots">
+    {slides.map((_, i) => (
+      <button class={`hero-dot ${i === 0 ? 'active' : ''}`} data-index={i} aria-label={`第 ${i + 1} 张`}></button>
+    ))}
+  </div>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <div class="scroll-line"></div>
   </div>
 </section>
 
+<style>
+  .hero-root { position: relative; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); }
+  .hero-bg { position: absolute; inset: 0; }
+  .hero-slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.05); transition: opacity 1.2s ease-in-out, transform 1.5s ease-in-out; }
+  .hero-slide.active { opacity: 1; transform: scale(1); }
+  .hero-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(30,20,40,0.72) 0%, rgba(30,20,40,0.40) 50%, rgba(20,15,35,0.68) 100%); z-index: 1; }
+  .hero-lights { position: absolute; inset: 0; overflow: hidden; z-index: 1; }
+  .light { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.10; animation: lightPulse 8s ease-in-out infinite alternate; }
+  .light-1 { width:600px; height:600px; top:-200px; right:-100px; background:#E8738A; }
+  .light-2 { width:450px; height:450px; bottom:-100px; left:-50px; background:#6B7DB3; animation-delay:3s; }
+  .light-3 { width:300px; height:300px; top:40%; left:50%; background:#7EC8E3; animation-delay:6s; }
+  @keyframes lightPulse { 0% { opacity:0.06; transform:scale(1); } 100% { opacity:0.14; transform:scale(1.15); } }
+  .hero-dots { position: absolute; bottom: 5rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.6rem; z-index: 3; }
+  .hero-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.35); border: none; cursor: pointer; transition: all 0.3s ease; }
+  .hero-dot.active { background: #fff; width: 24px; border-radius: 4px; }
+  .hero-dot:hover { background: rgba(255,255,255,0.7); }
+  .hero-content { position: absolute; bottom: 14%; left: 0; right: 0; padding: 0 clamp(1.5rem, 8vw, 8rem); z-index: 2; }
+  .hero-eyebrow { font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem; font-weight: 500; font-family: var(--font-mono); }
+  .hero-title { display: flex; flex-direction: column; gap: 0.15em; margin-bottom: 1.5rem; }
+  .title-line { font-size: clamp(3rem, 8vw, 6.5rem); font-weight: 800; line-height: 1.05; color: #fff; letter-spacing: -0.02em; transition: all 0.5s ease; }
+  .title-line.accent { background: linear-gradient(135deg, #F0A0B5 0%, #9DAFDE 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 2rem; border-radius: 9999px; background: rgba(255,255,255,0.95); color: #1a1a2e; font-weight: 600; font-size: 0.95rem; text-decoration: none; transition: all 0.3s ease; backdrop-filter: blur(10px); }
+  .btn-primary:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+  .btn-ghost { display: inline-flex; align-items: center; padding: 0.85rem 2rem; border-radius: 9999px; border: 1.5px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.85); font-weight: 500; font-size: 0.95rem; text-decoration: none; transition: all 0.3s ease; backdrop-filter: blur(10px); }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.08); transform: translateY(-2px); }
+  .scroll-hint { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 2; }
+  .scroll-line { width: 1px; height: 36px; background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent); animation: scrollLine 2s ease-in-out infinite; }
+  @keyframes scrollLine { 0%,100% { transform:scaleY(0.4); opacity:0.3; } 50% { transform:scaleY(1); opacity:1; } }
+</style>
+
+<div id="slide-data" style="display:none" data-slides={JSON.stringify(slides.map(s=>({title:s.title||'',subtitle:s.subtitle||''})))}></div>
+
 <script is:inline>
   (function() {
-    var track = document.getElementById('carousel-track');
-    var dots = document.querySelectorAll('.carousel-dot');
-    var prev = document.getElementById('carousel-prev');
-    var next = document.getElementById('carousel-next');
-    if (!track || !dots.length) return;
-    var total = dots.length, current = 0, autoTimer;
-    function goTo(index) {
-      current = ((index % total) + total) % total;
-      track.style.transform = 'translateX(-' + (current * 100) + '%)';
-      dots.forEach(function(d, i) { d.style.width = i === current ? '24px' : '8px'; d.style.background = i === current ? 'white' : 'rgba(255,255,255,0.5)'; });
+    var el = document.getElementById('slide-data');
+    if (!el) return;
+    var slideData = JSON.parse(el.getAttribute('data-slides') || '[]');
+    var slides = document.querySelectorAll('.hero-slide');
+    var dots = document.querySelectorAll('.hero-dot');
+    var titleEl = document.getElementById('slide-title');
+    var subEl = document.getElementById('slide-subtitle');
+    if (slides.length < 2) return;
+
+    var current = 0, timer;
+    function show(i) {
+      slides.forEach(function(s){s.classList.remove('active')});
+      dots.forEach(function(d){d.classList.remove('active')});
+      slides[i].classList.add('active');
+      dots[i].classList.add('active');
+      var d = slideData[i] || {};
+      if(titleEl) titleEl.textContent = d.title || '';
+      if(subEl) subEl.textContent = d.subtitle || '';
     }
-    function nextSlide() { goTo(current + 1); }
-    function prevSlide() { goTo(current - 1); }
-    function startAuto() { clearInterval(autoTimer); autoTimer = setInterval(nextSlide, 4000); }
-    prev?.addEventListener('click', function() { prevSlide(); startAuto(); });
-    next?.addEventListener('click', function() { nextSlide(); startAuto(); });
-    dots.forEach(function(d) { d.addEventListener('click', function() { goTo(parseInt(this.getAttribute('data-index')||'0')); startAuto(); }); });
-    track.parentElement?.addEventListener('mouseenter', function() { clearInterval(autoTimer); });
-    track.parentElement?.addEventListener('mouseleave', startAuto);
-    goTo(0); startAuto();
+    function next() { current = (current + 1) % slides.length; show(current); }
+    function startAuto() { clearInterval(timer); timer = setInterval(next, 5000); }
+    dots.forEach(function(d){ d.addEventListener('click', function(){ current = parseInt(this.getAttribute('data-index')||'0'); show(current); startAuto(); }); });
+    startAuto();
   })();
 </script>
