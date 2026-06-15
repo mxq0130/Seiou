@@ -119,7 +119,12 @@ export async function getDiaries(page = 1, limit = 30): Promise<PaginatedResult<
     const { mockDiaries, paginate } = await import('./mock');
     return paginate(mockDiaries, page, limit);
   }
-  return fetchAPI<PaginatedResult<DiaryEntry>>(`/diary?page=${page}&limit=${limit}`);
+  const data = await fetchAPI<any>('/diary');
+  // 兼容服务器返回数组或分页对象
+  if (Array.isArray(data)) {
+    return { list: data, total: data.length, page: 1, totalPages: 1 };
+  }
+  return data as PaginatedResult<DiaryEntry>;
 }
 
 // ===== 统计 =====
