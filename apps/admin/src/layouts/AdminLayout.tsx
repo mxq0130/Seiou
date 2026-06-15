@@ -5,7 +5,7 @@ import {
   DashboardOutlined, FileTextOutlined, UserOutlined, SettingOutlined,
   LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
   PlayCircleOutlined, PictureOutlined, BookOutlined, LinkOutlined,
-  IdcardOutlined, TagsOutlined, FolderOutlined, NotificationOutlined,
+  IdcardOutlined, TagsOutlined, FolderOutlined, NotificationOutlined, MessageOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
@@ -23,6 +23,7 @@ const menuItems = [
   { key: '/tags', icon: <TagsOutlined />, label: '标签管理' },
   { key: '/categories', icon: <FolderOutlined />, label: '分类管理' },
   { key: '/announcements', icon: <NotificationOutlined />, label: '公告管理' },
+  { key: '/comments', icon: <MessageOutlined />, label: '评论管理' },
 ];
 
 export default function AdminLayout() {

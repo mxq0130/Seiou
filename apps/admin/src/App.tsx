@@ -16,6 +16,7 @@ import AboutPage from './pages/AboutManage';
 import TagsPage from './pages/TagsManage';
 import CategoriesPage from './pages/CategoriesManage';
 import AnnouncementsPage from './pages/AnnouncementsManage';
+import CommentPage from './pages/CommentManage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token');
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="tags" element={<TagsPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="comments" element={<CommentPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

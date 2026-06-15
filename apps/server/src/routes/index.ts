@@ -12,6 +12,7 @@ import statsRoutes from './stats.js';
 import categoriesRoutes from './categories.js';
 import tagsRoutes from './tags.js';
 import announcementsRoutes from './announcements.js';
+import commentsRoutes from './comments.js';
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.use('/stats', statsRoutes);
 router.use('/categories', categoriesRoutes);
 router.use('/tags', tagsRoutes);
 router.use('/announcements', announcementsRoutes);
+router.use('/comments', commentsRoutes);
 
 // 健康检查
 router.get('/health', (_req, res) => {

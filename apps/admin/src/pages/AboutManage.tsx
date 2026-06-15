@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Card, Form, Input, InputNumber, Button, message, Row, Col, Spin } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import { Card, Form, Input, InputNumber, Button, message, Row, Col, Spin, Upload } from 'antd';
+import { SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import api from '../api/client';
 
 export default function AboutPage() {
@@ -30,6 +30,17 @@ export default function AboutPage() {
             <Col span={12}><Form.Item name="name" label="昵称"><Input /></Form.Item></Col>
           </Row>
           <Form.Item name="bio" label="个人简介"><Input.TextArea rows={3} /></Form.Item>
+          <Form.Item name="avatar" label="个人头像" extra="填入图片URL或点击上传">
+            <div style={{ display:'flex', gap:8 }}>
+              <Input placeholder="https://..." style={{ flex:1 }} />
+              <Upload showUploadList={false} customRequest={({ file, onSuccess }: any) => {
+                const fd = new FormData(); fd.append('file', file);
+                api.post('/images/upload', fd, { headers:{'Content-Type':'multipart/form-data'}, transformRequest:[(d:any)=>d] }).then((r:any) => {
+                  if (r.code===0) { form.setFieldValue('avatar', r.data.url); message.success('上传成功'); onSuccess?.(r.data); }
+                }).catch(()=>message.error('上传失败'));
+              }}><Button icon={<UploadOutlined />}>上传头像</Button></Upload>
+            </div>
+          </Form.Item>
           <Row gutter={16}>
             <Col span={8}><Form.Item name={['socialLinks','github']} label="GitHub"><Input /></Form.Item></Col>
             <Col span={8}><Form.Item name={['socialLinks','bilibili']} label="Bilibili"><Input /></Form.Item></Col>

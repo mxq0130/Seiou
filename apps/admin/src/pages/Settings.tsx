@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
-  Card, Form, Input, Button, message, Switch, Divider, Space, Row, Col, Spin,
+  Card, Form, Input, Button, message, Switch, Divider, Space, Row, Col, Spin, Upload,
 } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import { SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import api from '../api/client';
 
 export default function SettingsPage() {
@@ -153,6 +153,17 @@ export default function SettingsPage() {
                         <Form.Item {...rest} name={[name, 'image']} noStyle>
                           <Input placeholder="图片URL" />
                         </Form.Item>
+                        <Upload showUploadList={false} customRequest={({ file, onSuccess }: any) => {
+                          const fd = new FormData(); fd.append('file', file);
+                          api.post('/images/upload', fd, { headers:{'Content-Type':'multipart/form-data'}, transformRequest:[(d:any)=>d] }).then((r:any) => {
+                            if (r.code===0) {
+                              const slides = form.getFieldValue('carouselSlides') || [];
+                              slides[name] = { ...slides[name], image: r.data.url };
+                              form.setFieldValue('carouselSlides', slides);
+                              message.success('上传成功'); onSuccess?.(r.data);
+                            }
+                          }).catch(()=>message.error('上传失败'));
+                        }}><Button size="small" icon={<UploadOutlined />} /></Upload>
                       </Col>
                       <Col span={5}>
                         <Form.Item {...rest} name={[name, 'title']} noStyle>
