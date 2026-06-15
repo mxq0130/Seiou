@@ -16,6 +16,7 @@ model User {
   avatar    String?   @db.VarChar(500)
   role      Role      @default(USER)
   status    UserStatus @default(ACTIVE)
+  label     String?   @db.VarChar(50)
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 

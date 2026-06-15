@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Table, Tag, Space, Button, message, Popconfirm } from 'antd';
+import { Table, Tag, Space, Button, message, Popconfirm, Modal, Form, Input, Select } from 'antd';
+import { EditOutlined } from '@ant-design/icons';
 import api from '../api/client';
 
 export default function UserListPage() {
@@ -7,6 +8,9 @@ export default function UserListPage() {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [editForm] = Form.useForm();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -43,10 +47,28 @@ export default function UserListPage() {
     }
   };
 
+  const openEdit = (r: any) => {
+    setEditing(r);
+    editForm.setFieldsValue(r);
+    setEditOpen(true);
+  };
+
+  const handleEditSave = async () => {
+    const values = await editForm.validateFields();
+    await api.put(`/users/${editing.id}`, values);
+    message.success('用户信息已更新');
+    setEditOpen(false);
+    fetchUsers();
+  };
+
   const columns = [
     { title: 'ID', dataIndex: 'id', width: 60 },
     { title: '用户名', dataIndex: 'username' },
     { title: '邮箱', dataIndex: 'email' },
+    {
+      title: '标签', dataIndex: 'label', width: 80,
+      render: (l: string) => l ? <Tag color="orange">{l}</Tag> : <span style={{color:'#999'}}>-</span>,
+    },
     {
       title: '角色', dataIndex: 'role', width: 80,
       render: (r: string) => <Tag color={r === 'ADMIN' ? 'purple' : 'blue'}>{r === 'ADMIN' ? '管理员' : '用户'}</Tag>,
@@ -63,6 +85,7 @@ export default function UserListPage() {
       title: '操作', width: 200,
       render: (_: any, r: any) => (
         <Space>
+          <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(r)}>编辑</Button>
           <Popconfirm title="确定操作？" onConfirm={() => handleToggle(r.id, r.status)}>
             <Button size="small" danger={r.status === 'ACTIVE'}>
               {r.status === 'ACTIVE' ? '禁用' : '启用'}
@@ -88,6 +111,16 @@ export default function UserListPage() {
         loading={loading}
         pagination={{ current: page, total, onChange: setPage, showSizeChanger: false }}
       />
+      <Modal title="编辑用户" open={editOpen} onOk={handleEditSave} onCancel={() => setEditOpen(false)} width={500}>
+        <Form form={editForm} layout="vertical">
+          <Form.Item name="username" label="用户名" rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="email" label="邮箱" rules={[{ required: true, type: 'email' }]}><Input /></Form.Item>
+          <Form.Item name="avatar" label="头像URL"><Input placeholder="https://..." /></Form.Item>
+          <Form.Item name="label" label="用户标签"><Input placeholder="如：博主、摄影师、画师" /></Form.Item>
+          <Form.Item name="role" label="角色"><Select options={[{ value: 'ADMIN', label: '管理员' }, { value: 'USER', label: '普通用户' }]} /></Form.Item>
+          <Form.Item name="status" label="状态"><Select options={[{ value: 'ACTIVE', label: '正常' }, { value: 'DISABLED', label: '禁用' }]} /></Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
