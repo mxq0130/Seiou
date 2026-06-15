@@ -21,7 +21,7 @@ const info = statusLabels[s] || statusLabels['watching'];
   <div class="flex gap-4 p-4">
     <div class="w-20 sm:w-24 shrink-0">
       <div class="aspect-[3/4] rounded-lg overflow-hidden bg-[var(--color-primary-light)]">
-        {cover ? <img src={cover} alt={title} class="w-full h-full object-cover" loading="lazy"/> : <div class="w-full h-full flex items-center justify-center text-3xl" style="font-family:var(--font-title)">🎬</div>}
+        {cover ? <img src={cover} alt={title} class="w-full h-full object-cover" loading="lazy" referrerpolicy="no-referrer"/> : <div class="w-full h-full flex items-center justify-center text-3xl" style="font-family:var(--font-title)">🎬</div>}
       </div>
     </div>
     <div class="flex-1 min-w-0">
