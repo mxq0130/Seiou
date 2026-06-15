@@ -1,17 +1,25 @@
 ---
+import { getSettings } from '../lib/data';
 import StatsWidget from './widgets/StatsWidget.astro';
 import Announcement from './widgets/Announcement.astro';
 import CategoriesWidget from './widgets/CategoriesWidget.astro';
 import TagsWidget from './widgets/TagsWidget.astro';
 import MusicPlayer from './widgets/MusicPlayer.astro';
 import CalendarWidget from './widgets/CalendarWidget.astro';
+
+let widgets: Record<string, boolean> = {};
+try {
+  const s = await getSettings();
+  if (s.sidebarWidgets) widgets = s.sidebarWidgets;
+} catch {}
+const show = (k: string) => widgets[k] !== false; // 默认显示
 ---
 
 <div class="hidden lg:block space-y-5">
-  <Announcement />
-  <StatsWidget />
-  <MusicPlayer />
-  <CategoriesWidget />
-  <TagsWidget />
-  <CalendarWidget />
+  {show('announcement') && <Announcement />}
+  {show('stats') && <StatsWidget />}
+  {show('music') && <MusicPlayer />}
+  {show('categories') && <CategoriesWidget />}
+  {show('tags') && <TagsWidget />}
+  {show('calendar') && <CalendarWidget />}
 </div>

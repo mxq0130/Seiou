@@ -1,40 +1,101 @@
 ---
+import { getAbout } from '../lib/data';
 import Layout from '../layouts/Layout.astro';
 
-const skills = [
-  { name:'HTML/CSS', level:90 }, { name:'JavaScript/TypeScript', level:85 }, { name:'React', level:80 },
-  { name:'Node.js', level:75 }, { name:'Astro', level:70 }, { name:'MySQL', level:65 }, { name:'Docker', level:55 }, { name:'Python', level:50 },
-];
+let about: any = {
+  name: 'まつざか ゆき',
+  bio: '一个热爱二次元的前端开发者。',
+  socialLinks: {} as any,
+  skills: [] as any[],
+  projects: [] as any[],
+  timeline: [] as any[],
+};
+try {
+  const data = await getAbout();
+  if (data) about = { ...about, ...data };
+} catch {}
 ---
 
 <Layout title="关于">
   <div class="max-w-3xl">
     <h1 class="text-2xl sm:text-3xl font-bold mb-8 gradient-text" style="font-family:var(--font-heading)">👤 关于</h1>
+
+    <!-- 个人信息 -->
     <section class="glass rounded-xl p-6 mb-6" style="box-shadow:var(--shadow-card)">
       <div class="flex flex-col sm:flex-row gap-6 items-start">
-        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white text-4xl shrink-0" style="font-family:var(--font-title)">雪</div>
+        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white text-4xl shrink-0" style="font-family:var(--font-title)">
+          {about.name?.[0] || '?'}
+        </div>
         <div>
-          <h2 class="text-xl font-bold mb-2" style="font-family:var(--font-heading)">まつざか ゆき</h2>
-          <p class="text-sm text-[var(--color-text-secondary)] mb-4">一个热爱二次元的前端开发者。喜欢摄影、追番、写代码。这个博客记录了我的学习、生活和兴趣。</p>
-          <div class="flex flex-wrap gap-2">
-            <a href="https://github.com" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">🐙 GitHub</a>
-            <a href="https://bilibili.com" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">📺 Bilibili</a>
-            <a href="mailto:example@boke.local" class="px-3 py-1.5 rounded-lg bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">📧 Email</a>
-          </div>
+          <h2 class="text-xl font-bold mb-2" style="font-family:var(--font-heading)">{about.name}</h2>
+          <p class="text-sm text-[var(--color-text-secondary)] mb-4">{about.bio}</p>
+          {about.socialLinks && (
+            <div class="flex flex-wrap gap-2">
+              {about.socialLinks.github && (
+                <a href={about.socialLinks.github} target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">🐙 GitHub</a>
+              )}
+              {about.socialLinks.bilibili && (
+                <a href={about.socialLinks.bilibili} target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">📺 Bilibili</a>
+              )}
+              {about.socialLinks.email && (
+                <a href={`mailto:${about.socialLinks.email}`} class="px-3 py-1.5 rounded-lg bg-[var(--color-primary-light)] text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all">📧 Email</a>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>
-    <section class="glass rounded-xl p-6" style="box-shadow:var(--shadow-card)">
-      <h2 class="text-lg font-bold mb-4" style="font-family:var(--font-heading)">🛠️ 技能栈</h2>
-      <div class="space-y-3">
-        {skills.map(s=>(
-          <div class="flex items-center gap-3">
-            <span class="text-sm text-[var(--color-text)] w-36 shrink-0">{s.name}</span>
-            <div class="flex-1 h-2 bg-[var(--color-primary-light)] rounded-full overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]" style={`width:${s.level}%`}></div></div>
-            <span class="text-xs text-[var(--color-text-secondary)] w-8">{s.level}%</span>
-          </div>
-        ))}
-      </div>
-    </section>
+
+    <!-- 技能 -->
+    {about.skills && about.skills.length > 0 && (
+      <section class="glass rounded-xl p-6 mb-6" style="box-shadow:var(--shadow-card)">
+        <h2 class="text-lg font-bold mb-4" style="font-family:var(--font-heading)">🛠️ 技能栈</h2>
+        <div class="space-y-3">
+          {about.skills.map((s: any) => (
+            <div class="flex items-center gap-3">
+              <span class="text-sm text-[var(--color-text)] w-36 shrink-0">{s.name}</span>
+              <div class="flex-1 h-2 bg-[var(--color-primary-light)] rounded-full overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]" style={`width:${s.level}%`}></div></div>
+              <span class="text-xs text-[var(--color-text-secondary)] w-8">{s.level}%</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- 项目 -->
+    {about.projects && about.projects.length > 0 && (
+      <section class="glass rounded-xl p-6 mb-6" style="box-shadow:var(--shadow-card)">
+        <h2 class="text-lg font-bold mb-4" style="font-family:var(--font-heading)">🚀 项目</h2>
+        <div class="space-y-3">
+          {about.projects.map((p: any) => (
+            <div class="p-3 rounded-lg bg-[var(--color-primary-light)]">
+              <div class="flex items-center justify-between mb-1">
+                <h3 class="font-medium text-[var(--color-text)]">{p.name}</h3>
+                {p.url && <a href={p.url} target="_blank" rel="noopener" class="text-xs text-[var(--color-primary)] hover:underline">🔗</a>}
+              </div>
+              <p class="text-xs text-[var(--color-text-secondary)]">{p.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- 时间线 -->
+    {about.timeline && about.timeline.length > 0 && (
+      <section class="glass rounded-xl p-6" style="box-shadow:var(--shadow-card)">
+        <h2 class="text-lg font-bold mb-4" style="font-family:var(--font-heading)">📅 时间线</h2>
+        <div class="space-y-3">
+          {about.timeline.map((t: any) => (
+            <div class="flex gap-3">
+              <span class="text-sm font-bold text-[var(--color-primary)] shrink-0 w-12">{t.year}</span>
+              <div>
+                <p class="text-sm font-medium text-[var(--color-text)]">{t.event}</p>
+                {t.desc && <p class="text-xs text-[var(--color-text-secondary)]">{t.desc}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
   </div>
 </Layout>

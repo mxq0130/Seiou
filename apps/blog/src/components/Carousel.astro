@@ -1,48 +1,22 @@
 ---
-// 轮播图数据 — 可从 settings API 获取，这里用默认二次元风格图
-const slides = [
-  {
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=500&fit=crop',
-    title: '星空下的约定',
-    subtitle: '原创科幻恋爱番 · 火星殖民地',
-    link: '/anime',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=500&fit=crop',
-    title: '魔法少女的秘密',
-    subtitle: 'C2C 出品 · 治愈系日常',
-    link: '/anime',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=500&fit=crop',
-    title: '剑与魔法的时代',
-    subtitle: '异世界的文艺复兴 · 经典题材新演绎',
-    link: '/posts/anime-2025',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&h=500&fit=crop',
-    title: 'Lycoris Recoil',
-    subtitle: '千束和泷奈的故事继续 · A-1 Pictures',
-    link: '/anime',
-  },
+import { getSettings } from '../lib/data';
+
+const defaultSlides = [
+  { image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=500&fit=crop', title: '星空下的约定', subtitle: '原创科幻恋爱番', link: '/anime' },
+  { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=500&fit=crop', title: '魔法少女的秘密', subtitle: 'C2C · 治愈系日常', link: '/anime' },
 ];
+
+let slides = defaultSlides;
+try { const s = await getSettings(); if (s.carouselSlides && s.carouselSlides.length > 0) slides = s.carouselSlides; } catch {}
 ---
 
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
   <div class="relative overflow-hidden rounded-2xl" style="box-shadow: var(--shadow-card-hover);">
-    <!-- 轮播容器 -->
     <div class="carousel-track flex transition-transform duration-700 ease-out" id="carousel-track">
       {slides.map((slide, i) => (
-        <a href={slide.link} class="carousel-slide w-full shrink-0 relative group cursor-pointer" style="aspect-ratio: 12/5;">
-          <img
-            src={slide.image}
-            alt={slide.title}
-            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            loading={i === 0 ? 'eager' : 'lazy'}
-          />
-          <!-- 渐变遮罩 -->
+        <a href={slide.link || '#'} class="carousel-slide w-full shrink-0 relative group cursor-pointer" style="aspect-ratio: 12/5;">
+          <img src={slide.image} alt={slide.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading={i === 0 ? 'eager' : 'lazy'} />
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
-          <!-- 文字 -->
           <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
             <h3 class="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">{slide.title}</h3>
             <p class="text-sm sm:text-base text-white/80 mt-1 drop-shadow">{slide.subtitle}</p>
@@ -50,23 +24,15 @@ const slides = [
         </a>
       ))}
     </div>
-
-    <!-- 左右箭头 -->
     <button id="carousel-prev" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 flex items-center justify-center text-white transition-all z-10" aria-label="上一张">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <button id="carousel-next" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 flex items-center justify-center text-white transition-all z-10" aria-label="下一张">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
     </button>
-
-    <!-- 指示器 -->
     <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
       {slides.map((_, i) => (
-        <button
-          class="carousel-dot w-2 h-2 rounded-full transition-all duration-300 bg-white/50 hover:bg-white/80"
-          data-index={i}
-          aria-label={`第 ${i + 1} 张`}
-        ></button>
+        <button class="carousel-dot w-2 h-2 rounded-full transition-all duration-300 bg-white/50 hover:bg-white/80" data-index={i} aria-label={`第 ${i + 1} 张`}></button>
       ))}
     </div>
   </div>
@@ -79,44 +45,20 @@ const slides = [
     var prev = document.getElementById('carousel-prev');
     var next = document.getElementById('carousel-next');
     if (!track || !dots.length) return;
-
-    var total = dots.length;
-    var current = 0;
-    var autoTimer;
-
+    var total = dots.length, current = 0, autoTimer;
     function goTo(index) {
       current = ((index % total) + total) % total;
       track.style.transform = 'translateX(-' + (current * 100) + '%)';
-      dots.forEach(function(d, i) {
-        d.style.width = i === current ? '24px' : '8px';
-        d.style.background = i === current ? 'white' : 'rgba(255,255,255,0.5)';
-      });
+      dots.forEach(function(d, i) { d.style.width = i === current ? '24px' : '8px'; d.style.background = i === current ? 'white' : 'rgba(255,255,255,0.5)'; });
     }
-
     function nextSlide() { goTo(current + 1); }
     function prevSlide() { goTo(current - 1); }
-
-    function startAuto() {
-      stopAuto();
-      autoTimer = setInterval(nextSlide, 4000);
-    }
-    function stopAuto() { clearInterval(autoTimer); }
-
+    function startAuto() { clearInterval(autoTimer); autoTimer = setInterval(nextSlide, 4000); }
     prev?.addEventListener('click', function() { prevSlide(); startAuto(); });
     next?.addEventListener('click', function() { nextSlide(); startAuto(); });
-
-    dots.forEach(function(d) {
-      d.addEventListener('click', function() {
-        goTo(parseInt(this.getAttribute('data-index') || '0'));
-        startAuto();
-      });
-    });
-
-    track.parentElement?.addEventListener('mouseenter', stopAuto);
+    dots.forEach(function(d) { d.addEventListener('click', function() { goTo(parseInt(this.getAttribute('data-index')||'0')); startAuto(); }); });
+    track.parentElement?.addEventListener('mouseenter', function() { clearInterval(autoTimer); });
     track.parentElement?.addEventListener('mouseleave', startAuto);
-
-    // 初始化
-    goTo(0);
-    startAuto();
+    goTo(0); startAuto();
   })();
 </script>

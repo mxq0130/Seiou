@@ -1,4 +1,5 @@
 ---
+import { getSettings } from '../lib/data';
 const navLinks = [
   { href: '/', label: '首页' },
   { href: '/posts/', label: '文章' },
@@ -10,30 +11,25 @@ const navLinks = [
   { href: '/about/', label: '关于' },
 ];
 const currentPath = Astro.url.pathname;
+let siteTitle = '🌸 小破站';
+try { const s = await getSettings(); if (s.title) siteTitle = s.title; } catch {}
 ---
 
-<header
-  id="navbar"
-  class="fixed top-0 left-0 right-0 z-50 glass border-b border-[var(--color-border)]"
->
+<header id="navbar" class="fixed top-0 left-0 right-0 z-50 glass border-b border-[var(--color-border)]">
   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
       <a href="/" class="flex items-center gap-2 text-xl font-bold shrink-0" style="font-family: var(--font-title)">
-        <span class="gradient-text">🌸 小破站</span>
+        <span class="gradient-text">🌸 {siteTitle}</span>
       </a>
-
       <div class="hidden md:flex items-center gap-1">
         {navLinks.map(link => (
           <a href={link.href} class={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300
-            ${currentPath === link.href
-              ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
-              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]'
-            }`}>
+            ${currentPath === link.href ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]'}`}>
             {link.label}
           </a>
         ))}
       </div>
-
+      <!-- rest unchanged -->
       <div class="flex items-center gap-2">
         <a href="/search/" class="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)] transition-all" title="搜索" aria-label="搜索">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -47,15 +43,11 @@ const currentPath = Astro.url.pathname;
         </button>
       </div>
     </div>
-
     <div id="mobile-menu" class="md:hidden hidden pb-4 pt-3">
       <div class="flex flex-col gap-1">
         {navLinks.map(link => (
           <a href={link.href} class={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150
-            ${currentPath === link.href
-              ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
-              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]'
-            }`}>
+            ${currentPath === link.href ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)]'}`}>
             {link.label}
           </a>
         ))}
@@ -65,28 +57,22 @@ const currentPath = Astro.url.pathname;
 </header>
 
 <script is:inline>
-  // 主题切换
   const toggle = document.getElementById('theme-toggle');
   const sunIcon = document.getElementById('icon-sun');
   const moonIcon = document.getElementById('icon-moon');
   const html = document.documentElement;
-
   function updateIcons() {
     const isDark = html.classList.contains('dark');
     sunIcon.classList.toggle('hidden', isDark);
     moonIcon.classList.toggle('hidden', !isDark);
   }
   updateIcons();
-
   toggle?.addEventListener('click', () => {
     html.classList.toggle('dark');
     localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
     updateIcons();
   });
-
-  // 移动端菜单
   document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
     document.getElementById('mobile-menu')?.classList.toggle('hidden');
   });
-
 </script>

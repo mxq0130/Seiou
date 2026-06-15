@@ -1,7 +1,13 @@
+---
+import { getSettings } from '../lib/data';
+let footerText = `© ${new Date().getFullYear()} まつざか ゆき. All Rights Reserved.`;
+try { const s = await getSettings(); if (s.footer) footerText = s.footer; } catch {}
+---
+
 <footer class="border-t border-[var(--color-border)] bg-[var(--color-surface)]">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[var(--color-text-secondary)]">
-      <span>© {new Date().getFullYear()} まつざか ゆき. All Rights Reserved.</span>
+      <span>{footerText}</span>
       <div class="flex items-center gap-4">
         <a href="/rss.xml" class="hover:text-[var(--color-primary)] transition-colors">RSS</a>
         <span class="text-[var(--color-border)]">/</span>

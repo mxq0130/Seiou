@@ -129,6 +129,12 @@ export async function getSettings(): Promise<Record<string, any>> {
   return cachedSettings || {};
 }
 
+// ===== 关于页 =====
+export async function getAbout(): Promise<Record<string, any>> {
+  if (isStatic) return {};
+  return fetchAPI<Record<string, any>>('/about');
+}
+
 // ===== 公告 =====
 export async function getAnnouncements(params?: { active?: boolean }): Promise<any[]> {
   if (isStatic) return [];
