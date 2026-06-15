@@ -1,14 +1,15 @@
 ---
 import { getSettings } from '../lib/data';
+const base = import.meta.env.BASE_URL || '/';
 const navLinks = [
-  { href: '/', label: '首页' },
-  { href: '/posts/', label: '文章' },
-  { href: '/archive/', label: '归档' },
-  { href: '/links/', label: '友链' },
-  { href: '/anime/', label: '追番' },
-  { href: '/albums/', label: '图集' },
-  { href: '/diary/', label: '日记' },
-  { href: '/about/', label: '关于' },
+  { href: `${base}`, label: '首页' },
+  { href: `${base}posts/`, label: '文章' },
+  { href: `${base}archive/`, label: '归档' },
+  { href: `${base}links/`, label: '友链' },
+  { href: `${base}anime/`, label: '追番' },
+  { href: `${base}albums/`, label: '图集' },
+  { href: `${base}diary/`, label: '日记' },
+  { href: `${base}about/`, label: '关于' },
 ];
 const currentPath = Astro.url.pathname;
 let siteTitle = '🌸 小破站';
