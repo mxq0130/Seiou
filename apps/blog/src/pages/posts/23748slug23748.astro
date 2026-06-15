@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+
+const { slug } = Astro.params;
+const title = String(slug).replace(/-/g, ' ');
+---
+
+<Layout title={title}>
+  <article class="max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">{title}</h1>
+    <div class="prose"><p>文章内容加载中...</p></div>
+  </article>
+</Layout>
