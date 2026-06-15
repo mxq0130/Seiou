@@ -1,15 +1,17 @@
 ---
 import { getSettings } from '../lib/data';
 const base = import.meta.env.BASE_URL || '/';
+const isStatic = import.meta.env.ASTRO_MODE === 'static';
+const ext = isStatic ? 'index.html' : '';
 const navLinks = [
-  { href: `${base}`, label: '首页' },
-  { href: `${base}posts/`, label: '文章' },
-  { href: `${base}archive/`, label: '归档' },
-  { href: `${base}links/`, label: '友链' },
-  { href: `${base}anime/`, label: '追番' },
-  { href: `${base}albums/`, label: '图集' },
-  { href: `${base}diary/`, label: '日记' },
-  { href: `${base}about/`, label: '关于' },
+  { href: `${base}${ext || ''}`, label: '首页' },
+  { href: `${base}posts/${ext}`, label: '文章' },
+  { href: `${base}archive/${ext}`, label: '归档' },
+  { href: `${base}links/${ext}`, label: '友链' },
+  { href: `${base}anime/${ext}`, label: '追番' },
+  { href: `${base}albums/${ext}`, label: '图集' },
+  { href: `${base}diary/${ext}`, label: '日记' },
+  { href: `${base}about/${ext}`, label: '关于' },
 ];
 const currentPath = Astro.url.pathname;
 let siteTitle = '🌸 小破站';
@@ -32,7 +34,7 @@ try { const s = await getSettings(); if (s.title) siteTitle = s.title; } catch {
       </div>
       <!-- rest unchanged -->
       <div class="flex items-center gap-2">
-        <a href="/search/" class="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)] transition-all" title="搜索" aria-label="搜索">
+        <a href={`${base}search/${ext}`} class="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-primary-light)] transition-all" title="搜索" aria-label="搜索">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </a>
         <a href="/login" class="hidden sm:inline-flex text-xs px-3 py-1.5 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-all" id="nav-login-btn">登录</a>
