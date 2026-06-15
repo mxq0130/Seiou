@@ -4,6 +4,15 @@ import Layout from '../../layouts/Layout.astro';
 import CommentSection from '../../components/CommentSection.astro';
 import { marked } from 'marked';
 
+// 静态模式：预生成所有文章页面
+export async function getStaticPaths() {
+  if (import.meta.env.ASTRO_MODE === 'static') {
+    const { mockPosts } = await import('../../lib/mock');
+    return mockPosts.filter(p => p.status === 'published').map(p => ({ params: { slug: p.slug } }));
+  }
+  return [];
+}
+
 const { slug } = Astro.params;
 let post: any = null;
 let contentHtml = '';
@@ -18,7 +27,7 @@ try {
 }
 
 if (!post) {
-  return new Response(null, { status: 302, headers: { Location: '/posts/' } });
+  return Astro.redirect('/posts/');
 }
 
 const formattedDate = new Date(post.createdAt).toLocaleDateString('zh-CN', {

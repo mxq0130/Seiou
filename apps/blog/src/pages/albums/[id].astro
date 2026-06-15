@@ -1,6 +1,14 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 
+export async function getStaticPaths() {
+  if (import.meta.env.ASTRO_MODE === 'static') {
+    const { mockAlbums } = await import('../../lib/mock');
+    return mockAlbums.map(a => ({ params: { id: String(a.id) } }));
+  }
+  return [];
+}
+
 const { id } = Astro.params;
 let album: any = null;
 let images: any[] = [];
@@ -14,7 +22,7 @@ try {
 } catch (e) { console.error('获取相册失败:', e); }
 
 if (!album) {
-  return new Response(null, { status: 302, headers: { Location: '/albums/' } });
+  return Astro.redirect('/albums/');
 }
 ---
 
